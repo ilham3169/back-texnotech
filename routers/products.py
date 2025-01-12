@@ -86,7 +86,7 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     
-     # Checking category_id 
+    # Checking category_id 
     category = db.query(Category).filter(Category.id == product_data.category_id).first()
     if not category:
         raise HTTPException(

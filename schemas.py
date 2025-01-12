@@ -75,7 +75,7 @@ class ProductBase(BaseModel):
     model_name: str
     discount: int
     search_string: str
-    author_id: int
+    # author_id: int
 
 class ProductCreate(ProductBase):
     pass

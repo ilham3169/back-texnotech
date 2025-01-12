@@ -44,26 +44,31 @@ async def get_brand(brand_id: int, db: db_dependency):
     return brand
 
 
-# Update single Brand
 @router.put("/{brand_id}", response_model=BrandResponse, status_code=status.HTTP_200_OK)
 async def update_brand(brand_id: int, brand_data: BrandResponse, db: db_dependency):
-
     brand = db.query(Brand).filter(Brand.id == brand_id).first()
     if not brand:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
- 
-    # Checking brand_name
-    brand_name = db.query(Brand).filter(Brand.name == brand_data.name).first()
-    if brand_name:
+
+    existing_id = db.query(Brand).filter(Brand.id == brand_data.id).first()
+    if existing_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with name {brand_data.name} exists."
+            detail=f"Brand with id {brand_id} already exists."
         )
     
+
+    existing_name = db.query(Brand).filter(Brand.name == brand_data.name).first()
+    if existing_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Brand with name {brand_data.name} already exists."
+        )
+    
+    # Update the brand fields
     for key, value in brand_data.dict().items():
         setattr(brand, key, value)
 
-    # brand.updated_at = datetime.now(TIMEZONE)
     db.commit()
     db.refresh(brand)
     return brand
