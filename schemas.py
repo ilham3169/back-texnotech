@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
 
+
 # User Schemas
 class UserBase(BaseModel):
     first_name: str
@@ -25,6 +26,7 @@ class UserResponse(UserBase):
     class Config:
         orm_mode = True
 
+
 # Category Schemas
 class CategoryBase(BaseModel):
     name: str
@@ -41,6 +43,7 @@ class CategoryResponse(CategoryBase):
 
     class Config:
         orm_mode = True
+
 
 # Brand Schemas
 class BrandBase(BaseModel):
@@ -59,6 +62,7 @@ class BrandResponse(BrandBase):
 
     class Config:
         orm_mode = True
+
 
 # Product Schemas
 class ProductBase(BaseModel):
@@ -84,6 +88,7 @@ class ProductResponse(ProductBase):
     class Config:
         orm_mode = True
 
+
 # Specification Schemas
 class SpecificationBase(BaseModel):
     name: str
@@ -97,6 +102,7 @@ class SpecificationResponse(SpecificationBase):
 
     class Config:
         orm_mode = True
+
 
 # Product Specification Schemas
 class ProductSpecificationBase(BaseModel):

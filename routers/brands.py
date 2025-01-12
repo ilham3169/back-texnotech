@@ -7,10 +7,10 @@ from models import Product, Category, Brand, User
 from schemas import BrandResponse, BrandBase, BrandCreate
 import logging
 from datetime import datetime
-import pytz
+# import pytz
 
 
-TIMEZONE = pytz.timezone("Asia/Baku")
+# TIMEZONE = pytz.timezone("Asia/Baku")
 
 router = APIRouter(
     prefix="/brands",
@@ -28,11 +28,14 @@ db_dependency = Annotated[Session, Depends(get_db)]
 logger = logging.getLogger("uvicorn.error")
 
 
+# Retrieve all Brands
 @router.get("", response_model=List[BrandResponse], status_code=status.HTTP_200_OK)
 async def get_all_brands(db: db_dependency):
     brands = db.query(Brand).order_by(text("date_created DESC")).all()
     return brands
 
+
+# Retrieve single Brand
 @router.get("/{brand_id}", response_model=BrandResponse, status_code=status.HTTP_200_OK)
 async def get_brand(brand_id: int, db: db_dependency):
     brand = db.query(Brand).filter(Brand.id == brand_id).first()
@@ -40,6 +43,8 @@ async def get_brand(brand_id: int, db: db_dependency):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
     return brand
 
+
+# Update single Brand
 @router.put("/{brand_id}", response_model=BrandResponse, status_code=status.HTTP_200_OK)
 async def update_brand(brand_id: int, brand_data: BrandResponse, db: db_dependency):
 
@@ -58,12 +63,13 @@ async def update_brand(brand_id: int, brand_data: BrandResponse, db: db_dependen
     for key, value in brand_data.dict().items():
         setattr(brand, key, value)
 
-    brand.updated_at = datetime.now(TIMEZONE)
+    # brand.updated_at = datetime.now(TIMEZONE)
     db.commit()
     db.refresh(brand)
     return brand
 
 
+# Create a Brand
 @router.post("/add", response_model=BrandResponse, status_code=status.HTTP_201_CREATED)
 async def create_brand(brand_data: BrandResponse, db: db_dependency):
     
@@ -81,6 +87,8 @@ async def create_brand(brand_data: BrandResponse, db: db_dependency):
     db.refresh(new_brand)
     return new_brand
 
+
+# Delete a Brand
 @router.delete("/{brand_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_brand(brand_id: int, db: db_dependency):
 

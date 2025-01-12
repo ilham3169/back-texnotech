@@ -6,7 +6,10 @@ import os
 from dotenv import load_dotenv
 
 
-URL_DATABASE = "mysql://root:ppGoWIfXdrCfLiXtTTLwCJHeBldWDZOY@junction.proxy.rlwy.net:49390/railway"
+load_dotenv()
+
+
+URL_DATABASE = os.getenv("URL_REMOTE_DATABASE")
 
 engine = create_engine(URL_DATABASE)
 
