@@ -20,6 +20,8 @@ site_build
 venv
 docs.zip
 archive.zip
+__pycache__/
+
 
 # vim temporary files
 *~
