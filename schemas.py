@@ -5,16 +5,18 @@ from datetime import datetime
 
 # User Schemas
 class UserBase(BaseModel):
+    fin: str
     first_name: str
     last_name: str
     email: Optional[EmailStr] = None
     phone: str
     is_admin: Optional[bool] = False
     is_seller: Optional[bool] = False
-    is_active: Optional[bool] = True
 
 class UserCreate(UserBase):
+
     password: str
+    confirm_password: str
 
 class UserResponse(UserBase):
     id: int
@@ -22,9 +24,11 @@ class UserResponse(UserBase):
     phone_verified: bool
     date_created: datetime
     updated_at: datetime
+    is_active: Optional[bool] = True
+
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Category Schemas
@@ -118,3 +122,22 @@ class ProductSpecificationResponse(ProductSpecificationBase):
 
     class Config:
         orm_mode = True
+
+
+# JWT Token Schemas
+class Token (BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+
+# Email Schemas
+class EmailSchema(BaseModel):
+    email: EmailStr
+
+
+# Password Schemas
+class PasswordResetConfirmModel(BaseModel):
+    new_password: str
+    confirm_new_password: str
+    
