@@ -6,7 +6,7 @@ from database import sessionLocal
 from models import Product, Category, Brand, User
 from schemas import ProductBase, ProductCreate, ProductResponse
 import logging
-# import pytz
+import pytz
 from datetime import datetime
 
 
@@ -22,13 +22,12 @@ def get_db():
     finally:
         db.close()
 
-
 db_dependency = Annotated[Session, Depends(get_db)]
 logger = logging.getLogger("uvicorn.error")
-# TIMEZONE = pytz.timezone("Asia/Baku")
+TIMEZONE = pytz.timezone("Asia/Baku")
 
-# Create a Product
-@router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+
+@router.post("/add", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 async def create_product(product_data: ProductCreate, db: db_dependency):
     new_product = Product(**product_data.dict())
     
@@ -62,15 +61,11 @@ async def create_product(product_data: ProductCreate, db: db_dependency):
     db.refresh(new_product)
     return new_product
 
-
-# Retrieve all Products 
 @router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
 async def get_all_products(db: db_dependency):
     products = db.query(Product).order_by(text("date_created DESC")).all()
     return products
 
-
-# Retrieve single Product
 @router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def get_product(product_id: int, db: db_dependency):
     product = db.query(Product).filter(Product.id == product_id).first()
@@ -78,7 +73,6 @@ async def get_product(product_id: int, db: db_dependency):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product
 
-# Update single Product
 @router.put("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def update_product(product_id: int, product_data: ProductCreate, db: db_dependency):
 
@@ -105,15 +99,13 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
     for key, value in product_data.dict().items():
         setattr(product, key, value)
 
-    # product.updated_at = datetime.now(TIMEZONE)
+    product.updated_at = datetime.now(TIMEZONE)
 
 
     db.commit()
     db.refresh(product)
     return product
 
-
-# Delete single Product
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(product_id: int, db: db_dependency):
 
