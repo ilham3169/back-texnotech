@@ -29,25 +29,24 @@ logger = logging.getLogger("uvicorn.error")
 
 
 @router.get("", response_model=List[BrandResponse], status_code=status.HTTP_200_OK)
-async def get_all_brands(db: db_dependency):
+async def get_all_brands(db: db_dependency): # type: ignore
     brands = db.query(Brand).order_by(text("date_created DESC")).all()
     return brands
 
 @router.get("/{brand_id}", response_model=BrandResponse, status_code=status.HTTP_200_OK)
-async def get_brand(brand_id: int, db: db_dependency):
+async def get_brand(brand_id: int, db: db_dependency): # type: ignore
     brand = db.query(Brand).filter(Brand.id == brand_id).first()
     if not brand:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
     return brand
 
 @router.put("/{brand_id}", response_model=BrandResponse, status_code=status.HTTP_200_OK)
-async def update_brand(brand_id: int, brand_data: BrandResponse, db: db_dependency):
+async def update_brand(brand_id: int, brand_data: BrandCreate, db: db_dependency):
 
     brand = db.query(Brand).filter(Brand.id == brand_id).first()
     if not brand:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
  
-    # Checking brand_name
     brand_name = db.query(Brand).filter(Brand.name == brand_data.name).first()
     if brand_name:
         raise HTTPException(
@@ -65,7 +64,7 @@ async def update_brand(brand_id: int, brand_data: BrandResponse, db: db_dependen
 
 
 @router.post("/add", response_model=BrandResponse, status_code=status.HTTP_201_CREATED)
-async def create_brand(brand_data: BrandResponse, db: db_dependency):
+async def create_brand(brand_data: BrandCreate, db: db_dependency):
     
     # Checking ID of Brand
     brend = db.query(Brand).filter(Brand.id == brand_data.id).first()               

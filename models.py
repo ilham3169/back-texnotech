@@ -85,7 +85,7 @@ class Specification(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(127), nullable=False)
-    category = Column(String(63), nullable=False)
+    category_id = Column(Integer, nullable=False)
 
     product_specifications = relationship("ProductSpecification", back_populates="specification")
 

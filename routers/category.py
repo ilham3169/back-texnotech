@@ -1,13 +1,13 @@
 from typing import List, Annotated
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import text
+from fastapi import APIRouter, Depends, HTTPException, status, Response # type: ignore
+from sqlalchemy.orm import Session # type: ignore
+from sqlalchemy.sql.expression import text # type: ignore
 from database import sessionLocal
 from models import Product, Category, Brand, User, Category
 from schemas import BrandResponse, BrandBase, BrandCreate, CategoryResponse, CategoryBase, CategoryCreate
 import logging
 from datetime import datetime
-import pytz
+import pytz # type: ignore
 
 TIMEZONE = pytz.timezone("Asia/Baku")
 
@@ -28,13 +28,13 @@ logger = logging.getLogger("uvicorn.error")
 
 
 @router.get("", response_model=List[CategoryResponse], status_code=status.HTTP_200_OK)
-async def get_all_categories(db: db_dependency):
+async def get_all_categories(db: db_dependency): # type: ignore
     category = db.query(Category).order_by(text("date_created DESC")).all()
     return category
-
+ 
 
 @router.get("/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
-async def get_category(category_id: int, db: db_dependency):
+async def get_category(category_id: int, db: db_dependency): # type: ignore
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
@@ -42,7 +42,7 @@ async def get_category(category_id: int, db: db_dependency):
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_category(category_id: int, db: db_dependency):
+async def delete_category(category_id: int, db: db_dependency): # type: ignore
 
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
@@ -53,7 +53,7 @@ async def delete_category(category_id: int, db: db_dependency):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.post("/add", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
-async def create_category(category_data: CategoryCreate, db: db_dependency):
+async def create_category(category_data: CategoryCreate, db: db_dependency): # type: ignore
     
     category = db.query(Category).filter(Category.name == category_data.name).first()               
     if category:
@@ -75,7 +75,7 @@ async def create_category(category_data: CategoryCreate, db: db_dependency):
     return new_category
 
 @router.put("/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
-async def update_category(category_id: int, category_data: CategoryBase, db: db_dependency):
+async def update_category(category_id: int, category_data: CategoryBase, db: db_dependency): # type: ignore
 
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:

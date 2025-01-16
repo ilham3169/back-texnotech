@@ -96,7 +96,7 @@ class ProductResponse(ProductBase):
 # Specification Schemas
 class SpecificationBase(BaseModel):
     name: str
-    category: str
+    category_id: int
 
 class SpecificationCreate(SpecificationBase):
     pass

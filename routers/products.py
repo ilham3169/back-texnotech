@@ -1,12 +1,12 @@
 from typing import List, Annotated
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import text
+from fastapi import APIRouter, Depends, HTTPException, status, Response # type: ignore
+from sqlalchemy.orm import Session # type: ignore
+from sqlalchemy.sql.expression import text # type: ignore
 from database import sessionLocal
 from models import Product, Category, Brand, User
 from schemas import ProductBase, ProductCreate, ProductResponse
 import logging
-import pytz
+import pytz # type: ignore
 from datetime import datetime
 
 
@@ -27,11 +27,22 @@ logger = logging.getLogger("uvicorn.error")
 TIMEZONE = pytz.timezone("Asia/Baku")
 
 
+@router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
+async def get_all_products(db: db_dependency): # type: ignore
+    products = db.query(Product).order_by(text("date_created DESC")).all()
+    return products
+
+@router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
+async def get_product(product_id: int, db: db_dependency): # type: ignore
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    return product
+
 @router.post("/add", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-async def create_product(product_data: ProductCreate, db: db_dependency):
+async def create_product(product_data: ProductCreate, db: db_dependency): # type: ignore
     new_product = Product(**product_data.dict())
     
-    # Checking category_id 
     category = db.query(Category).filter(Category.id == product_data.category_id).first()
     if not category:
         raise HTTPException(
@@ -46,32 +57,10 @@ async def create_product(product_data: ProductCreate, db: db_dependency):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Brend with id {product_data.brend_id} does not exist."
         )
-
-    # Checking author_id
-    # author_id = db.query(User).filter(User.id == product_data.author_id).first()
-    # if not author_id:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail=f"Author id : {product_data.brend_id} does not exist."
-    #     )
-    # ????
-    
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
     return new_product
-
-@router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
-async def get_all_products(db: db_dependency):
-    products = db.query(Product).order_by(text("date_created DESC")).all()
-    return products
-
-@router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
-async def get_product(product_id: int, db: db_dependency):
-    product = db.query(Product).filter(Product.id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-    return product
 
 @router.put("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def update_product(product_id: int, product_data: ProductCreate, db: db_dependency):
@@ -80,7 +69,6 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     
-     # Checking category_id 
     category = db.query(Category).filter(Category.id == product_data.category_id).first()
     if not category:
         raise HTTPException(
@@ -88,7 +76,6 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
             detail=f"Category with id {product_data.category_id} does not exist."
         )
     
-    # Checking brend_id
     brend = db.query(Brand).filter(Brand.id == product_data.brend_id).first()
     if not brend:
         raise HTTPException(
@@ -101,13 +88,12 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
 
     product.updated_at = datetime.now(TIMEZONE)
 
-
     db.commit()
     db.refresh(product)
     return product
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: int, db: db_dependency):
+async def delete_product(product_id: int, db: db_dependency): # type: ignore
 
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
