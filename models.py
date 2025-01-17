@@ -1,7 +1,7 @@
-from sqlalchemy import (
+from sqlalchemy import ( # type: ignore
     Boolean, Column, Integer, String, DateTime, Enum, ForeignKey, TIMESTAMP, text
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship # type: ignore
 from database import Base
 
 
@@ -24,7 +24,7 @@ class User(Base):
     last_login = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     date_created = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    fin = Column(String, unique=True)
+    fin = Column(String, unique=True)   
 
     products = relationship("Product", back_populates="author")
 
@@ -71,6 +71,7 @@ class Product(Base):
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     search_string = Column(String(511), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_super = Column(Boolean, nullable=False, default=False)
 
     category = relationship("Category", back_populates="products")
     brend = relationship("Brand", back_populates="products")  # Ensure this is correct

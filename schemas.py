@@ -84,6 +84,7 @@ class ProductBase(BaseModel):
     discount: int
     search_string: str
     author_id: int
+    is_super: bool
 
 
 class ProductCreate(ProductBase):
