@@ -64,7 +64,7 @@ class Product(Base):
     price = Column(Integer, nullable=False)
     num_product = Column(Integer, nullable=False, default=0)
     image_link = Column(String(255), nullable=False)
-    brend_id = Column(Integer, ForeignKey("brends.id"), nullable=False)
+    brend_id = Column(Integer, ForeignKey("brends.id"), nullable=False)  # Ensure this is correct
     model_name = Column(String(127), nullable=False)
     discount = Column(Integer, nullable=False)
     date_created = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
@@ -73,11 +73,10 @@ class Product(Base):
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     category = relationship("Category", back_populates="products")
-    brend = relationship("Brand", back_populates="products")
+    brend = relationship("Brand", back_populates="products")  # Ensure this is correct
     author = relationship("User", back_populates="products")
     specifications = relationship("ProductSpecification", back_populates="product")
     images = relationship("Image", back_populates="product", cascade="all, delete-orphan")
-    
 
 class Specification(Base):
     __tablename__ = "specifications"

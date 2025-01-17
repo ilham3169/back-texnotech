@@ -77,9 +77,9 @@ class ProductBase(BaseModel):
     name: str
     category_id: int
     price: int
-    num_product: Optional[int] = 0
+    num_product: int = 0  # Default value is set to 0, no need for Optional
     image_link: str
-    brand_id: int
+    brend_id: int  # Use brend_id here to match the SQLAlchemy model
     model_name: str
     discount: int
     search_string: str
@@ -96,8 +96,7 @@ class ProductResponse(ProductBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
-
+        orm_mode = True 
 
 # Specification Schemas
 class SpecificationBase(BaseModel):
