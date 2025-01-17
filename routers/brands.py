@@ -1,13 +1,13 @@
 from typing import List, Annotated
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import text
+from fastapi import APIRouter, Depends, HTTPException, status, Response # type: ignore
+from sqlalchemy.orm import Session # type: ignore
+from sqlalchemy.sql.expression import text # type: ignore
 from database import sessionLocal
 from models import Product, Category, Brand, User
 from schemas import BrandResponse, BrandBase, BrandCreate
 import logging
 from datetime import datetime
-import pytz
+import pytz # type: ignore
 
 
 TIMEZONE = pytz.timezone("Asia/Baku")
@@ -64,7 +64,7 @@ async def update_brand(brand_id: int, brand_data: BrandCreate, db: db_dependency
 
 
 @router.post("/add", response_model=BrandResponse, status_code=status.HTTP_201_CREATED)
-async def create_brand(brand_data: BrandCreate, db: db_dependency):
+async def create_brand(brand_data: BrandCreate, db: db_dependency): # type: ignore
     
     # Checking ID of Brand
     brend = db.query(Brand).filter(Brand.id == brand_data.id).first()               
@@ -81,7 +81,7 @@ async def create_brand(brand_data: BrandCreate, db: db_dependency):
     return new_brand
 
 @router.delete("/{brand_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_brand(brand_id: int, db: db_dependency):
+async def delete_brand(brand_id: int, db: db_dependency): # type: ignore
 
     brand = db.query(Brand).filter(Brand.id == brand_id).first()
     if not brand:

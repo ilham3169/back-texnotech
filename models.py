@@ -2,7 +2,6 @@ from sqlalchemy import (
     Boolean, Column, Integer, String, DateTime, Enum, ForeignKey, TIMESTAMP, text
 )
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from database import Base
 
 
@@ -56,7 +55,6 @@ class Brand(Base):
 
     products = relationship("Product", back_populates="brend")
 
-
 class Product(Base):
     __tablename__ = "products"
 
@@ -78,7 +76,8 @@ class Product(Base):
     brend = relationship("Brand", back_populates="products")
     author = relationship("User", back_populates="products")
     specifications = relationship("ProductSpecification", back_populates="product")
-
+    images = relationship("Image", back_populates="product", cascade="all, delete-orphan")
+    
 
 class Specification(Base):
     __tablename__ = "specifications"
@@ -100,3 +99,14 @@ class ProductSpecification(Base):
 
     product = relationship("Product", back_populates="specifications")
     specification = relationship("Specification", back_populates="product_specifications")
+
+
+class Image(Base):
+    __tablename__ = "images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    image_link = Column(String(511), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=True)
+
+    # Relationships
+    product = relationship("Product", back_populates="images")

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
 
@@ -13,10 +13,11 @@ class UserBase(BaseModel):
     is_admin: Optional[bool] = False
     is_seller: Optional[bool] = False
 
-class UserCreate(UserBase):
 
+class UserCreate(UserBase):
     password: str
     confirm_password: str
+
 
 class UserResponse(UserBase):
     id: int
@@ -25,7 +26,6 @@ class UserResponse(UserBase):
     date_created: datetime
     updated_at: datetime
     is_active: Optional[bool] = True
-
 
     class Config:
         from_attributes = True
@@ -37,8 +37,10 @@ class CategoryBase(BaseModel):
     num_category: Optional[int] = 0
     is_active: Optional[bool] = False
 
+
 class CategoryCreate(CategoryBase):
     pass
+
 
 class CategoryResponse(CategoryBase):
     id: int
@@ -52,12 +54,14 @@ class CategoryResponse(CategoryBase):
 # Brand Schemas
 class BrandBase(BaseModel):
     name: str
-    num_brend: Optional[int] = 0
+    num_brand: Optional[int] = 0
     is_active: Optional[bool] = False
     image_link: str
 
+
 class BrandCreate(BrandBase):
     pass
+
 
 class BrandResponse(BrandBase):
     id: int
@@ -75,14 +79,16 @@ class ProductBase(BaseModel):
     price: int
     num_product: Optional[int] = 0
     image_link: str
-    brend_id: int
+    brand_id: int
     model_name: str
     discount: int
     search_string: str
     author_id: int
 
+
 class ProductCreate(ProductBase):
     pass
+
 
 class ProductResponse(ProductBase):
     id: int
@@ -98,8 +104,10 @@ class SpecificationBase(BaseModel):
     name: str
     category_id: int
 
+
 class SpecificationCreate(SpecificationBase):
     pass
+
 
 class SpecificationResponse(SpecificationBase):
     id: int
@@ -114,8 +122,10 @@ class ProductSpecificationBase(BaseModel):
     specification_id: int
     value: str
 
+
 class ProductSpecificationCreate(ProductSpecificationBase):
     pass
+
 
 class ProductSpecificationResponse(ProductSpecificationBase):
     id: int
@@ -124,8 +134,25 @@ class ProductSpecificationResponse(ProductSpecificationBase):
         orm_mode = True
 
 
+# Image Schemas
+class ImageBase(BaseModel):
+    image_link: str
+    product_id: Optional[int] = None
+
+
+class ImageCreate(ImageBase):
+    pass
+
+class ImageResponse(BaseModel):
+    id: int
+    image_link: str
+    product_id: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+
 # JWT Token Schemas
-class Token (BaseModel):
+class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
@@ -140,4 +167,3 @@ class EmailSchema(BaseModel):
 class PasswordResetConfirmModel(BaseModel):
     new_password: str
     confirm_new_password: str
-    
