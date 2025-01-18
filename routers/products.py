@@ -32,11 +32,6 @@ async def get_all_products(db: db_dependency): # type: ignore
     products = db.query(Product).order_by(text("date_created DESC")).all()
     return products
 
-@router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
-async def get_all_products(db: db_dependency): # type: ignore
-    products = db.query(Product).order_by(text("date_created DESC")).all()
-    return products
-    
 @router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def get_product(product_id: int, db: db_dependency): # type: ignore
     product = db.query(Product).filter(Product.id == product_id).first()
