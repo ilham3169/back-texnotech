@@ -26,6 +26,7 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 logger = logging.getLogger("uvicorn.error")
 
+
 @router.get("", response_model=List[SpecificationResponse], status_code=status.HTTP_200_OK)
 async def get_all_specification(db: db_dependency): # type: ignore
     specification = db.query(Specification).all()
@@ -39,6 +40,7 @@ async def get_specification(specification_id: int, db: db_dependency): # type: i
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Specification not found")
     return specification
 
+
 @router.delete("/{specification_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_specification(specification_id: int, db: db_dependency): # type: ignore
 
@@ -49,6 +51,7 @@ async def delete_specification(specification_id: int, db: db_dependency): # type
     db.delete(specification)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 @router.post("/add", response_model=SpecificationResponse, status_code=status.HTTP_201_CREATED)
 async def create_specification(specification_data: SpecificationCreate, db: db_dependency): # type: ignore
@@ -62,6 +65,4 @@ async def create_specification(specification_data: SpecificationCreate, db: db_d
     db.commit()
     db.refresh(new_specification)
     return new_specification
-
- 
  

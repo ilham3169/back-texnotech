@@ -1,6 +1,6 @@
 from typing import List, Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Response # type: ignore
-from sqlalchemy.orm import Session # type: ignore
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.sql.expression import text # type: ignore
 from database import sessionLocal
 from models import Product, Category, Brand, User, Category, ProductSpecification, Specification
@@ -33,13 +33,28 @@ async def get_all_p_specification(db: db_dependency): # type: ignore
 
 
 
-@router.get("/{p_specification_id}", response_model=ProductSpecificationResponse, status_code=status.HTTP_200_OK)
-async def get_p_specification(p_specification_id: int, db: db_dependency): # type: ignore
-    p_specification = db.query(ProductSpecification).filter(ProductSpecification.id == p_specification_id).first()
-    if not p_specification:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product specification is not found")
-    return p_specification
+@router.get("/{product_id}",  status_code=status.HTTP_200_OK)
+async def get_p_specification(product_id: int, db: db_dependency): 
 
+    p_specifications = (
+        db.query(ProductSpecification)
+        .join(Specification, ProductSpecification.specification_id == Specification.id)
+        .filter(ProductSpecification.product_id == product_id)
+        .options(joinedload(ProductSpecification.specification)) 
+        .all()
+    )
+
+    data = [
+        {
+            "id": p_specification.id,
+            "name": p_specification.specification.name,
+            "value": p_specification.value,
+            "category_id": p_specification.specification.category_id,
+        }
+        for p_specification in p_specifications
+    ]
+
+    return data
 
 
 @router.delete("/{p_specification_id}", status_code=status.HTTP_204_NO_CONTENT)
