@@ -96,3 +96,32 @@ def create_url_safe_token(data: dict):
 
 def get_redis(request: Request):
     return request.app.state.redis
+
+
+def fill_cache_products(products, redis):
+    for product in products:
+        key = f"product:{product.__dict__.get('id')}"
+        redis.hset(
+            key, 
+            mapping={
+                "id": product.__dict__.get("id"),
+                "author_id": product.__dict__.get("author_id"),
+                "category_id": product.__dict__.get("category_id"),
+                "brend_id": product.__dict__.get("brend_id"),
+
+                "name": product.__dict__.get("name"),
+                "model_name":product.__dict__.get("model_name"),
+                "search_string": product.__dict__.get("search_string"),
+
+                "price": product.__dict__.get("price"),
+                "num_product": product.__dict__.get("num_product"),
+                "discount": product.__dict__.get("discount"),
+                
+                "image_link": product.__dict__.get("image_link"),
+
+                "date_created": str(product.date_created),
+                "updated_at": str(product.updated_at),
+
+                "is_super": str(product.__dict__.get("is_super")),
+            }
+        )

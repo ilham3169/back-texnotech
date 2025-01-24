@@ -1,20 +1,17 @@
 from typing import List, Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Response # type: ignore
-import re
 
 from sqlalchemy.orm import Session # type: ignore
 from sqlalchemy.sql.expression import text # type: ignore
 
 import logging
 
-import json
-
-import pytz # type: ignore
+import pytz
 from datetime import datetime
 
 from redis import Redis
 
-from .utils.services import get_redis
+from .utils.services import get_redis, fill_cache_products
 from database import sessionLocal
 from models import Product, Category, Brand, User
 from schemas import ProductCreate, ProductResponse
@@ -42,9 +39,24 @@ TIMEZONE = pytz.timezone("Asia/Baku")
 @router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
 async def get_all_products(db: db_dependency, redis: redis_dependency): # type: ignore
     try:
-
+        
+        # If there are products' data in cache
         cached_products_keys= redis.keys("product:*")
         if cached_products_keys:
+
+            baku_timezone = pytz.timezone("Asia/Baku")
+
+            # Get the current time in the Baku timezone
+            baku_time = datetime.now(baku_timezone).hour
+            # CLear & refill the cached data at 8 AM everyday
+            if baku_time == 8:
+
+                products = db.query(Product).order_by(text("date_created DESC")).all()
+                
+                fill_cache_products(products, redis)
+                return products
+
+            # Get products' data tom cache
             products = []
             for key in cached_products_keys:
                 product = redis.hgetall(key)
@@ -54,67 +66,20 @@ async def get_all_products(db: db_dependency, redis: redis_dependency): # type: 
 
             return products
 
+        # If no products' data in cache
         else:
             products = db.query(Product).order_by(text("date_created DESC")).all()
-            for product in products:
-                key = f"product:{product.__dict__.get('id')}"
-                redis.hset(
-                    key, 
-                    mapping={
-                        "id": product.__dict__.get("id"),
-                        "author_id": product.__dict__.get("author_id"),
-                        "category_id": product.__dict__.get("category_id"),
-                        "brend_id": product.__dict__.get("brend_id"),
-
-                        "name": product.__dict__.get("name"),
-                        "model_name":product.__dict__.get("model_name"),
-                        "search_string": product.__dict__.get("search_string"),
-
-                        "price": product.__dict__.get("price"),
-                        "num_product": product.__dict__.get("num_product"),
-                        "discount": product.__dict__.get("discount"),
-                        
-                        "image_link": product.__dict__.get("image_link"),
-
-                        "date_created": str(product.date_created),
-                        "updated_at": str(product.updated_at),
-
-                        "is_super": str(product.__dict__.get("is_super")),
-                    }
-                )
+            
+            fill_cache_products(products, redis)
                 
             return products
-        
+    
+    # In case of any error, retrieve data from database
     except Exception as e:
 
         products = db.query(Product).order_by(text("date_created DESC")).all()
         
-        for product in products:
-            key = f"product:{product.__dict__.get('id')}"
-            redis.hset(
-                key, 
-                mapping={
-                    "id": product.__dict__.get("id"),
-                    "author_id": product.__dict__.get("author_id"),
-                    "category_id": product.__dict__.get("category_id"),
-                    "brend_id": product.__dict__.get("brend_id"),
-
-                    "name": product.__dict__.get("name"),
-                    "model_name":product.__dict__.get("model_name"),
-                    "search_string": product.__dict__.get("search_string"),
-
-                    "price": product.__dict__.get("price"),
-                    "num_product": product.__dict__.get("num_product"),
-                    "discount": product.__dict__.get("discount"),
-                    
-                    "image_link": product.__dict__.get("image_link"),
-
-                    "date_created": str(product.date_created),
-                    "updated_at": str(product.updated_at),
-
-                    "is_super": str(product.__dict__.get("is_super")),
-                }
-            )
+        fill_cache_products(products, redis)
 
     return products
 
@@ -125,6 +90,7 @@ async def get_product(product_id: int, db: db_dependency): # type: ignore
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product
+
 
 @router.post("/add", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 async def create_product(product_data: ProductCreate, db: db_dependency): # type: ignore
@@ -148,6 +114,7 @@ async def create_product(product_data: ProductCreate, db: db_dependency): # type
     db.commit()
     db.refresh(new_product)
     return new_product
+
 
 @router.put("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def update_product(product_id: int, product_data: ProductCreate, db: db_dependency):
@@ -179,6 +146,7 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
     db.refresh(product)
     return product
 
+
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(product_id: int, db: db_dependency): # type: ignore
 
@@ -189,4 +157,3 @@ async def delete_product(product_id: int, db: db_dependency): # type: ignore
     db.delete(product)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
