@@ -7,7 +7,7 @@ from models import Product, Category, Brand, User, Category, ProductSpecificatio
 from schemas import  ProductSpecificationResponse, ProductSpecificationCreate, ProductSpecificationBase
 import logging
 from datetime import datetime
-import pytz # type: ignore
+import pytz
 
 TIMEZONE = pytz.timezone("Asia/Baku")
 
@@ -32,29 +32,14 @@ async def get_all_p_specification(db: db_dependency): # type: ignore
     return p_specification
 
 
-
-@router.get("/{product_id}",  status_code=status.HTTP_200_OK)
-async def get_p_specification(product_id: int, db: db_dependency): 
-
-    p_specifications = (
-        db.query(ProductSpecification)
-        .join(Specification, ProductSpecification.specification_id == Specification.id)
-        .filter(ProductSpecification.product_id == product_id)
-        .options(joinedload(ProductSpecification.specification)) 
-        .all()
-    )
-
-    data = [
-        {
-            "id": p_specification.id,
-            "name": p_specification.specification.name,
-            "value": p_specification.value,
-            "category_id": p_specification.specification.category_id,
-        }
-        for p_specification in p_specifications
-    ]
-
-    return data
+@router.get("/{p_specification_id}", response_model=ProductSpecificationResponse, status_code=status.HTTP_200_OK)
+async def get_p_specification(p_specification_id: int, db: db_dependency):
+    p_specification = db.query(ProductSpecification).filter(ProductSpecification.id == p_specification_id).first()
+    
+    if not p_specification:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product specification is not found")
+    
+    return p_specification
 
 
 @router.delete("/{p_specification_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -69,7 +54,7 @@ async def delete_p_specification(p_specification_id: int, db: db_dependency): # 
 
 
 
-@router.post("/add", response_model=ProductSpecificationResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProductSpecificationResponse, status_code=status.HTTP_201_CREATED)
 async def create_product_specification(p_specification_data: ProductSpecificationCreate, db: db_dependency):  # type: ignore
     product = db.query(Product).filter(Product.id == p_specification_data.product_id).first()
     if not product:
@@ -136,3 +121,28 @@ async def update_p_specification(p_specification_id: int, p_specification_data: 
     db.commit()
     db.refresh(p_specification)
     return p_specification
+
+
+# Get all specifications of a Product with id = product_id
+@router.get("/{product_id}",  status_code=status.HTTP_200_OK)
+async def get_product_specifications(product_id: int, db: db_dependency): 
+
+    p_specifications = (
+        db.query(ProductSpecification)
+        .join(Specification, ProductSpecification.specification_id == Specification.id)
+        .filter(ProductSpecification.product_id == product_id)
+        .options(joinedload(ProductSpecification.specification)) 
+        .all()
+    )
+
+    data = [
+        {
+            "id": p_specification.id,
+            "name": p_specification.specification.name,
+            "value": p_specification.value,
+            "category_id": p_specification.specification.category_id,
+        }
+        for p_specification in p_specifications
+    ]
+
+    return data
