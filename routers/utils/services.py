@@ -123,5 +123,6 @@ def fill_cache_products(products, redis):
                 "updated_at": str(product.updated_at),
 
                 "is_super": str(product.__dict__.get("is_super")),
+                "is_new": str(product.__dict__.get("is_new")),
             }
         )

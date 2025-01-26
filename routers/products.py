@@ -80,7 +80,6 @@ async def get_all_products(db: db_dependency, redis: redis_dependency): # type: 
         products = db.query(Product).order_by(text("date_created DESC")).all()
         
         fill_cache_products(products, redis)
-
     return products
 
 
