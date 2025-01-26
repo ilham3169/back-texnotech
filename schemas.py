@@ -85,7 +85,7 @@ class ProductBase(BaseModel):
     search_string: str
     author_id: int
     is_super: bool
-
+    is_new: bool
 
 class ProductCreate(ProductBase):
     pass

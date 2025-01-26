@@ -72,6 +72,8 @@ class Product(Base):
     search_string = Column(String(511), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_super = Column(Boolean, nullable=False, default=False)
+    is_new = Column(Boolean, nullable=False, default=False)
+
 
     category = relationship("Category", back_populates="products")
     brend = relationship("Brand", back_populates="products")  # Ensure this is correct
