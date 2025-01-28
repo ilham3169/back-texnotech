@@ -124,7 +124,7 @@ async def update_p_specification(p_specification_id: int, p_specification_data: 
 
 
 # Get all specifications of a Product with id = product_id
-@router.get("/{product_id}",  status_code=status.HTTP_200_OK)
+@router.get("/values/{product_id}",  status_code=status.HTTP_200_OK)
 async def get_product_specifications(product_id: int, db: db_dependency): 
 
     p_specifications = (

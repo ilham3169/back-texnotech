@@ -165,7 +165,7 @@ def authenticate_user(phone_number: str, password: str, db):
     # Check if input password matches user's actual password
     if not bcrypt_context.verify(password, user.hashed_pass):
         return False
-    
+
     return user
 
 
