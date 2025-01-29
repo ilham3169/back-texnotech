@@ -38,6 +38,8 @@ class Category(Base):
     date_created = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     is_active = Column(Boolean, nullable=False, default=False)
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    icon_image_link = Column(String(511), nullable=False)
+
 
     products = relationship("Product", back_populates="category")
 

@@ -46,6 +46,7 @@ class CategoryResponse(CategoryBase):
     id: int
     date_created: datetime
     updated_at: datetime
+    icon_image_link: str
 
     class Config:
         orm_mode = True
