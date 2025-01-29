@@ -1,8 +1,9 @@
-from typing import List, Annotated
-from fastapi import APIRouter, Depends, HTTPException, status, Response # type: ignore
+from typing import List, Annotated, Optional
+from fastapi import APIRouter, Query, Depends, HTTPException, status, Response # type: ignore
 
 from sqlalchemy.orm import Session # type: ignore
 from sqlalchemy.sql.expression import text # type: ignore
+from sqlalchemy import and_
 
 import logging
 
@@ -11,7 +12,7 @@ from datetime import datetime
 
 from redis import Redis
 
-from .utils.services import get_redis, fill_cache_products
+from .utils.services import get_redis, fill_cache_products, check_filters_products
 from database import sessionLocal
 from models import Product, Category, Brand, User
 from schemas import ProductCreate, ProductResponse
@@ -37,12 +38,22 @@ TIMEZONE = pytz.timezone("Asia/Baku")
 
 
 @router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
-async def get_all_products(db: db_dependency, redis: redis_dependency): # type: ignore
+async def get_all_products(
+        db: db_dependency, 
+        redis: redis_dependency,
+
+        category_id: Optional[int] = Query(None), 
+        brand_id: Optional[int] = Query(None),
+        available: Optional[bool] = Query(None),
+        discount: Optional[bool] = Query(None),
+        max_price: Optional[float] = Query(None),
+        ): 
+    
     try:
         
-        # If there are products' data in cache
+        # If there are products' data in cache and there is not any filter
         cached_products_keys= redis.keys("product:*")
-        if cached_products_keys:
+        if cached_products_keys and not (category_id or brand_id or available or discount or max_price):
 
             baku_timezone = pytz.timezone("Asia/Baku")
 
@@ -68,18 +79,43 @@ async def get_all_products(db: db_dependency, redis: redis_dependency): # type: 
 
         # If no products' data in cache
         else:
-            products = db.query(Product).order_by(text("date_created DESC")).all()
+            # Get filters (if available)
+            filters = check_filters_products(
+                category_id, 
+                brand_id,
+                available,
+                discount,
+                max_price,
+            )
+
+            query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
+
+            products = query.all()
             
             fill_cache_products(products, redis)
-                
             return products
     
     # In case of any error, retrieve data from database
     except Exception as e:
 
-        products = db.query(Product).order_by(text("date_created DESC")).all()
-        
+        # Check if there any filters
+        if not (category_id or brand_id or available or discount or max_price):
+            products = db.query(Product).order_by(text("date_created DESC")).all()
+        else:
+            filters = check_filters_products(
+                category_id, 
+                brand_id,
+                available,
+                discount,
+                max_price,
+            )
+
+            query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
+
+            products = query.all()
+
         fill_cache_products(products, redis)
+
     return products
 
 

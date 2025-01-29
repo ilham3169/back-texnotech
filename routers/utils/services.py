@@ -1,6 +1,10 @@
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 
+from typing import Optional
+
+from fastapi import Query
+
 import re
 
 from itsdangerous import URLSafeTimedSerializer
@@ -9,6 +13,8 @@ from datetime import datetime, time
 
 from fastapi import Request
 import os
+
+from models import Product
 
 from dotenv import load_dotenv
 
@@ -126,3 +132,26 @@ def fill_cache_products(products, redis):
                 "is_new": str(product.__dict__.get("is_new")),
             }
         )
+
+
+def check_filters_products(
+        category_id: Optional[int] = Query(None), 
+        brand_id: Optional[int] = Query(None),
+        available: Optional[bool] = Query(None),
+        discount: Optional[bool] = Query(None),
+        max_price: Optional[float] = Query(None),
+    ):
+    
+    filters = []
+    if category_id:
+        filters.append(Product.category_id == category_id)
+    if brand_id:
+        filters.append(Product.brend_id == brand_id)
+    if available:
+        filters.append(Product.num_product > 0)
+    if discount:
+        filters.append(Product.discount > 0)
+    if max_price:
+        filters.append(Product.price <= max_price)
+
+    return filters
