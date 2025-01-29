@@ -39,6 +39,7 @@ class Category(Base):
     is_active = Column(Boolean, nullable=False, default=False)
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     icon_image_link = Column(String(511), nullable=False)
+    parent_category_id = Column(Integer, nullable = True, unique = True, default = None)
 
 
     products = relationship("Product", back_populates="category")

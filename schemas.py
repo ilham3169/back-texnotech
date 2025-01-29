@@ -44,6 +44,7 @@ class CategoryCreate(CategoryBase):
 
 class CategoryResponse(CategoryBase):
     id: int
+    parent_category_id: Optional[int] = None
     date_created: datetime
     updated_at: datetime
     icon_image_link: str
