@@ -2,12 +2,15 @@ from typing import List, Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Response # type: ignore
 from sqlalchemy.orm import Session # type: ignore
 from sqlalchemy.sql.expression import text # type: ignore
-from database import sessionLocal
-from models import Product, Category, Brand, User, Category
-from schemas import BrandResponse, BrandBase, BrandCreate, CategoryResponse, CategoryBase, CategoryCreate
+
 import logging
 from datetime import datetime
-import pytz # type: ignore
+import pytz 
+
+from database import sessionLocal
+from models import Category, Specification
+from schemas import BrandResponse, BrandBase, BrandCreate, CategoryResponse, CategoryBase, CategoryCreate
+
 
 TIMEZONE = pytz.timezone("Asia/Baku")
 
@@ -102,3 +105,22 @@ async def update_category(category_id: int, category_data: CategoryBase, db: db_
     db.commit()
     db.refresh(category)
     return category
+
+
+# Get all specifications of a Category
+@router.get("/values/{category_id}",  status_code=status.HTTP_200_OK)
+async def get_category_specifications(category_id: int, db: db_dependency): 
+
+    category_specifications = (
+        db.query(Specification).filter(Specification.category_id == category_id).all()
+    )
+
+    data = [
+        {
+            "id": category_specification.id,
+            "name": category_specification.name,
+        }
+        for category_specification in category_specifications
+    ]
+
+    return data
