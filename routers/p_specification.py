@@ -70,12 +70,6 @@ async def create_product_specification(p_specification_data: ProductSpecificatio
             detail="Specification not found with the specified ID."
         )
     
-    if int(p_specification_data.value) < 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Value cannot be negative"
-        )
-    
     new_p_specification = ProductSpecification(**p_specification_data.dict())
     db.add(new_p_specification)
     db.commit()
