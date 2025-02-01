@@ -55,14 +55,7 @@ async def delete_image(image_id: int, db: db_dependency): # type: ignore
 @router.post("/add", response_model=ImageResponse, status_code=status.HTTP_201_CREATED)
 async def create_image(image_data: ImageCreate, db: db_dependency): # type: ignore
     
-    brend = db.query(Brand).filter(Brand.id == image_data.id).first()               
-    if brend:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Image with id {image_data.id} exists. Existed brand name -> xxx"
-        )
-    
-    new_image = Brand(**image_data.dict())
+    new_image = Image(**image_data.dict())
     db.add(new_image)
     db.commit()
     db.refresh(new_image)
