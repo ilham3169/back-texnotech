@@ -1,6 +1,8 @@
 from fastapi import FastAPI # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from fastapi.middleware.trustedhost import TrustedHostMiddleware # type: ignore
+from fastapi.middleware.cors import CORSMiddleware
+
 import os
 
 from redis import Redis
@@ -13,10 +15,10 @@ from aws import s3
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"],  # Allow only your frontend domain
     allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
 )
 
 
