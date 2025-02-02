@@ -128,7 +128,7 @@ async def get_product(product_id: int, db: db_dependency): # type: ignore
 
 
 @router.post("/add", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-async def create_product(product_data: ProductCreate, db: db_dependency): # type: ignore
+async def create_product(product_data: ProductCreate, db: db_dependency, redis: redis_dependency): # type: ignore
     new_product = Product(**product_data.dict())
     
     category = db.query(Category).filter(Category.id == product_data.category_id).first()
@@ -148,11 +148,13 @@ async def create_product(product_data: ProductCreate, db: db_dependency): # type
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
+
+    redis.flushall()
     return new_product
 
 
 @router.put("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
-async def update_product(product_id: int, product_data: ProductCreate, db: db_dependency):
+async def update_product(product_id: int, product_data: ProductCreate, db: db_dependency, redis: redis_dependency):
 
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
@@ -179,11 +181,13 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
 
     db.commit()
     db.refresh(product)
+
+    redis.flushall()
     return product
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: int, db: db_dependency):  # type: ignore
+async def delete_product(product_id: int, db: db_dependency, redis: redis_dependency):  # type: ignore
     db.query(ProductSpecification).filter(ProductSpecification.product_id == product_id).delete()
 
     product = db.query(Product).filter(Product.id == product_id).first()
@@ -192,4 +196,5 @@ async def delete_product(product_id: int, db: db_dependency):  # type: ignore
 
     db.delete(product)
     db.commit()
+    redis.flushall()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
