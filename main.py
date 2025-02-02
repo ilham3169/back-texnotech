@@ -6,7 +6,7 @@ import os
 
 from redis import Redis
 
-from routers import products, brands, category, p_specification, specifications, images
+from routers import products, brands, category, p_specification, specifications, images, others
 from routers.auth import auth
 from aws import s3
 
@@ -45,3 +45,4 @@ app.include_router(p_specification.router)
 app.include_router(specifications.router)
 app.include_router(images.router)
 app.include_router(s3.router)
+app.include_router(others.router)
