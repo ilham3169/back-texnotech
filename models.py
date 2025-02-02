@@ -98,11 +98,11 @@ class ProductSpecification(Base):
     __tablename__ = "product_specifications"
 
     id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     specification_id = Column(Integer, ForeignKey("specifications.id"), nullable=False)
     value = Column(String(63), nullable=False)
 
-    product = relationship("Product", back_populates="specifications")
+    product = relationship("Product", back_populates="specifications", passive_deletes=True)
     specification = relationship("Specification", back_populates="product_specifications")
 
 

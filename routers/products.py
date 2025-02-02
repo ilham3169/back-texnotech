@@ -14,7 +14,7 @@ from redis import Redis
 
 from .utils.services import get_redis, fill_cache_products, check_filters_products
 from database import sessionLocal
-from models import Product, Category, Brand, User
+from models import Product, Category, Brand, User, ProductSpecification, Image
 from schemas import ProductCreate, ProductResponse
 
 
@@ -183,12 +183,13 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: int, db: db_dependency): # type: ignore
+async def delete_product(product_id: int, db: db_dependency):  # type: ignore
+    db.query(ProductSpecification).filter(ProductSpecification.product_id == product_id).delete()
 
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-    
+
     db.delete(product)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
