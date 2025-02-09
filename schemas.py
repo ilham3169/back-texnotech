@@ -100,6 +100,20 @@ class ProductResponse(ProductBase):
 
     class Config:
         orm_mode = True 
+    
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    category_id: Optional[int] = None 
+    price: Optional[int] = None  
+    num_product: Optional[int] = None
+    image_link: Optional[str] = None
+    brend_id: Optional[int] = None 
+    model_name: Optional[str] = None
+    discount: Optional[int] = None  
+    search_string: Optional[str] = None
+    author_id: Optional[int] = None  
+    is_super: Optional[bool] = None
+    is_new: Optional[bool] = None
 
 # Specification Schemas
 class SpecificationBase(BaseModel):

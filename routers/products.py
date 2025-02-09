@@ -15,7 +15,7 @@ from redis import Redis
 from .utils.services import get_redis, fill_cache_products, check_filters_products
 from database import sessionLocal
 from models import Product, Category, Brand, User, ProductSpecification, Image
-from schemas import ProductCreate, ProductResponse
+from schemas import ProductCreate, ProductResponse, ProductUpdate
 
 
 
@@ -154,27 +154,32 @@ async def create_product(product_data: ProductCreate, db: db_dependency, redis: 
 
 
 @router.put("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
-async def update_product(product_id: int, product_data: ProductCreate, db: db_dependency, redis: redis_dependency):
+async def update_product(product_id: int, product_data: ProductUpdate, db: db_dependency, redis: redis_dependency):
 
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-    
-    category = db.query(Category).filter(Category.id == product_data.category_id).first()
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with id {product_data.category_id} does not exist."
-        )
-    
-    brend = db.query(Brand).filter(Brand.id == product_data.brend_id).first()
-    if not brend:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Brend with id {product_data.brend_id} does not exist."
-        )
-    
-    for key, value in product_data.dict().items():
+
+    # Update only provided fields
+    update_data = product_data.dict(exclude_unset=True)
+
+    if "category_id" in update_data:
+        category = db.query(Category).filter(Category.id == update_data["category_id"]).first()
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Category with id {update_data['category_id']} does not exist."
+            )
+
+    if "brend_id" in update_data:
+        brend = db.query(Brand).filter(Brand.id == update_data["brend_id"]).first()
+        if not brend:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Brend with id {update_data['brend_id']} does not exist."
+            )
+
+    for key, value in update_data.items():
         setattr(product, key, value)
 
     product.updated_at = datetime.now(TIMEZONE)
@@ -184,6 +189,7 @@ async def update_product(product_id: int, product_data: ProductCreate, db: db_de
 
     redis.flushall()
     return product
+
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
