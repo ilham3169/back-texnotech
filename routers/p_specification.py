@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.sql.expression import text # type: ignore
 from database import sessionLocal
 from models import Product, Category, Brand, User, Category, ProductSpecification, Specification
-from schemas import  ProductSpecificationResponse, ProductSpecificationCreate, ProductSpecificationBase
+from schemas import  ProductSpecificationResponse, ProductSpecificationCreate, ProductSpecificationBase, ProductSpecificationUpdate
 import logging
 from datetime import datetime
 import pytz
@@ -78,7 +78,7 @@ async def create_product_specification(p_specification_data: ProductSpecificatio
 
 
 @router.put("/{p_specification_id}", response_model=ProductSpecificationResponse, status_code=status.HTTP_200_OK)
-async def update_p_specification(p_specification_id: int, p_specification_data: ProductSpecificationBase, db: db_dependency):  # type: ignore
+async def update_p_specification(p_specification_id: int, p_specification_data: ProductSpecificationUpdate, db: db_dependency):  # type: ignore
 
     p_specification = db.query(ProductSpecification).filter(ProductSpecification.id == p_specification_id).first()
     if not p_specification:
@@ -92,15 +92,7 @@ async def update_p_specification(p_specification_id: int, p_specification_data: 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="Product not found with the specified ID."
-        )
-
-    specification = db.query(Specification).filter(Specification.id == p_specification_data.specification_id).first()
-    if not specification:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Specification not found with the specified ID."
-        )
-    
+        )    
     
     for key, value in p_specification_data.dict().items():
         setattr(p_specification, key, value)

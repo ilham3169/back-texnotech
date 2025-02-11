@@ -139,6 +139,11 @@ class ProductSpecificationBase(BaseModel):
     value: str
 
 
+class ProductSpecificationUpdate(BaseModel):
+    product_id: int
+    value: str
+
+
 class ProductSpecificationCreate(ProductSpecificationBase):
     pass
 
