@@ -101,12 +101,6 @@ async def update_p_specification(p_specification_id: int, p_specification_data: 
             detail="Specification not found with the specified ID."
         )
     
-
-    if int(p_specification_data.value) < 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Value cannot be negative"
-        )
     
     for key, value in p_specification_data.dict().items():
         setattr(p_specification, key, value)
