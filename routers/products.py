@@ -81,9 +81,10 @@ async def get_all_products(
         # If no products' data in cache
         else:
             # Get filters (if available)
-            categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
-            category_ids = [category.id for category in categories]
-            category_ids.append(category_id)
+            if category_id:
+                categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
+                category_ids = [category.id for category in categories]
+                category_ids.append(category_id)
 
             filters = check_filters_products(
                 brand_id,
@@ -92,7 +93,12 @@ async def get_all_products(
                 max_price,
             )
             
-            query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
+            if category_id:
+                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
+            else:
+                print(1)
+                query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
+            
             products = query.all()
 
             fill_cache_products(products, redis)
@@ -105,9 +111,10 @@ async def get_all_products(
         if not (category_id or brand_id or available or discount or max_price):
             products = db.query(Product).order_by(text("date_created DESC")).all()
         else:
-            categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
-            category_ids = [category.id for category in categories]
-            category_ids.append(category_id)
+            if category_id:
+                categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
+                category_ids = [category.id for category in categories]
+                category_ids.append(category_id)
 
             filters = check_filters_products(
                 brand_id,
@@ -116,7 +123,11 @@ async def get_all_products(
                 max_price,
             )
 
-            query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
+            if category_id:
+                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
+            else:
+                print(2)
+                query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
 
             products = query.all()
 
