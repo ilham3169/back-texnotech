@@ -151,5 +151,5 @@ def check_filters_products(
         filters.append(Product.discount > 0)
     if max_price:
         filters.append(Product.price <= max_price)
-    
+
     return filters

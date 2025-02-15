@@ -92,10 +92,9 @@ async def get_all_products(
                 max_price,
             )
             
-            query = db.query(Product).filter(and_(*filters, (Product.category_id.in_(category_ids)))).order_by(text("date_created DESC"))
-
+            query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
             products = query.all()
-            
+
             fill_cache_products(products, redis)
             return products
     
@@ -117,7 +116,7 @@ async def get_all_products(
                 max_price,
             )
 
-            query = db.query(Product).filter(and_(*filters, (Product.category_id.in_(category_ids)))).order_by(text("date_created DESC"))
+            query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
 
             products = query.all()
 
