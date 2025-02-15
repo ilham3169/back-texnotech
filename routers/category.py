@@ -36,6 +36,12 @@ async def get_all_categories(db: db_dependency): # type: ignore
     return category
  
 
+@router.get("/parent", response_model=List[CategoryResponse], status_code=status.HTTP_200_OK)
+async def get_parent_categories(db: db_dependency): # type: ignore
+    category = db.query(Category).filter(Category.parent_category_id != None).order_by(text("date_created DESC")).all()
+    return category
+
+
 @router.get("/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
 async def get_category(category_id: int, db: db_dependency): # type: ignore
     category = db.query(Category).filter(Category.id == category_id).first()
