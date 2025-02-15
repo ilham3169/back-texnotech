@@ -61,10 +61,11 @@ async def get_all_products(
             baku_time = datetime.now(baku_timezone).hour
             # CLear & refill the cached data at 8 AM everyday
             if baku_time == 8:
-
-                products = db.query(Product).order_by(text("date_created DESC")).all()
                 
+                products = db.query(Product).order_by(text("date_created DESC")).all()
+
                 fill_cache_products(products, redis)
+
                 return products
 
             # Get products' data tom cache
@@ -80,15 +81,18 @@ async def get_all_products(
         # If no products' data in cache
         else:
             # Get filters (if available)
+            categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
+            category_ids = [category.id for category in categories]
+            category_ids.append(category_id)
+
             filters = check_filters_products(
-                category_id, 
                 brand_id,
                 available,
                 discount,
                 max_price,
             )
-
-            query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
+            
+            query = db.query(Product).filter(and_(*filters, (Product.category_id.in_(category_ids)))).order_by(text("date_created DESC"))
 
             products = query.all()
             
@@ -102,15 +106,18 @@ async def get_all_products(
         if not (category_id or brand_id or available or discount or max_price):
             products = db.query(Product).order_by(text("date_created DESC")).all()
         else:
+            categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
+            category_ids = [category.id for category in categories]
+            category_ids.append(category_id)
+
             filters = check_filters_products(
-                category_id, 
                 brand_id,
                 available,
                 discount,
                 max_price,
             )
 
-            query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
+            query = db.query(Product).filter(and_(*filters, (Product.category_id.in_(category_ids)))).order_by(text("date_created DESC"))
 
             products = query.all()
 

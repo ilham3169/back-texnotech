@@ -135,7 +135,6 @@ def fill_cache_products(products, redis):
 
 
 def check_filters_products(
-        category_id: Optional[int] = Query(None), 
         brand_id: Optional[int] = Query(None),
         available: Optional[bool] = Query(None),
         discount: Optional[bool] = Query(None),
@@ -143,8 +142,7 @@ def check_filters_products(
     ):
     
     filters = []
-    if category_id:
-        filters.append(Product.category_id == category_id)
+
     if brand_id:
         filters.append(Product.brend_id == brand_id)
     if available:
@@ -153,5 +151,5 @@ def check_filters_products(
         filters.append(Product.discount > 0)
     if max_price:
         filters.append(Product.price <= max_price)
-
+    
     return filters
