@@ -196,6 +196,8 @@ async def update_product(product_id: int, product_data: ProductUpdate, db: db_de
                 detail=f"Brend with id {update_data['brend_id']} does not exist."
             )
 
+    db.execute("UNLOCK TABLES;")
+    
     for key, value in update_data.items():
         setattr(product, key, value)
 
