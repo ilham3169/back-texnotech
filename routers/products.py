@@ -47,13 +47,14 @@ async def get_all_products(
         available: Optional[bool] = Query(None),
         discount: Optional[bool] = Query(None),
         max_price: Optional[float] = Query(None),
+        search_query: Optional[str] = Query(None),
         ): 
     
     try:
         
         # If there are products' data in cache and there is not any filter
         cached_products_keys= redis.keys("product:*")
-        if cached_products_keys and not (category_id or brand_id or available or discount or max_price):
+        if cached_products_keys and not (category_id or brand_id or available or discount or max_price or search_query):
 
             baku_timezone = pytz.timezone("Asia/Baku")
 
@@ -61,7 +62,7 @@ async def get_all_products(
             baku_time = datetime.now(baku_timezone).hour
             # CLear & refill the cached data at 8 AM everyday
             if baku_time == 8:
-                
+
                 products = db.query(Product).order_by(text("date_created DESC")).all()
 
                 fill_cache_products(products, redis)
@@ -77,6 +78,12 @@ async def get_all_products(
                 products.append(decoded_product)
 
             return products
+        # If there is a search query
+        elif search_query:
+            query = db.query(Product).filter(Product.search_string.ilike(f"%{search_query}%"))
+            product = query.all()
+
+            return product
 
         # If no products' data in cache
         else:
