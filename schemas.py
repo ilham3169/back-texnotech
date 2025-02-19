@@ -190,24 +190,15 @@ class PasswordResetConfirmModel(BaseModel):
     confirm_new_password: str
 
 
-<<<<<<< Updated upstream
-
-#### 
 
 # ---- Order Base Schemas ---- #
-=======
-#################################################
->>>>>>> Stashed changes
 class OrderBase(BaseModel):
     name: str
     surname: str
     phone_number: str
     total_price: float
-<<<<<<< Updated upstream
     status: Optional[str] = "pending"
-=======
     status: Optional[Literal["pending", "processing", "shipped", "delivered", "canceled"]] = "pending"
->>>>>>> Stashed changes
     payment_status: Optional[str] = "unpaid"
     payment_method: Optional[str] = None
 
