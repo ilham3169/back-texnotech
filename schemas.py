@@ -188,3 +188,86 @@ class EmailSchema(BaseModel):
 class PasswordResetConfirmModel(BaseModel):
     new_password: str
     confirm_new_password: str
+
+
+
+#### 
+
+# ---- Order Base Schemas ---- #
+class OrderBase(BaseModel):
+    name: str
+    surname: str
+    phone_number: str
+    total_price: float
+    status: Optional[str] = "pending"
+    payment_status: Optional[str] = "unpaid"
+    payment_method: Optional[str] = None
+
+
+class OrderCreate(OrderBase):
+    pass
+
+
+# ---- OrderItem Schemas ---- #
+class OrderItemBase(BaseModel):
+    product_id: int
+    quantity: int
+    price_at_purchase: float
+
+
+class OrderItemCreate(OrderItemBase):
+    pass
+
+
+class OrderItem(OrderItemBase):
+    id: int
+    order_id: int
+
+    class Config:
+        orm_mode = True
+
+
+# ---- Order Response Schemas ---- #
+class Order(OrderBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class OrderWithItems(Order):
+    order_items: List[OrderItem]
+
+    class Config:
+        orm_mode = True
+
+
+class OrderItemResponse(BaseModel):
+    id: int
+    order_id: int
+    product_id: int
+    quantity: int
+    price_at_purchase: float
+
+    class Config:
+        orm_mode = True
+
+
+class OrderResponse(BaseModel):
+    id: int
+    user_id: int
+    name: str
+    surname: str
+    phone_number: str
+    total_price: float
+    status: str
+    payment_status: str
+    payment_method: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    order_items: List[OrderItemResponse]
+
+    class Config:
+        orm_mode = True

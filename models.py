@@ -1,8 +1,9 @@
 from sqlalchemy import ( # type: ignore
-    Boolean, Column, Integer, String, DateTime, Enum, ForeignKey, TIMESTAMP, text
+    Boolean, Column, Integer, String, DateTime, Enum, ForeignKey, TIMESTAMP, text, Float
 )
 from sqlalchemy.orm import relationship # type: ignore
 from database import Base
+from datetime import datetime
 
 
 class User(Base):
@@ -115,3 +116,34 @@ class Image(Base):
 
     # Relationships
     product = relationship("Product", back_populates="images")
+
+
+class Order(Base):
+    __tablename__ = 'orders'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=True)  # Make user_id nullable
+    name = Column(String(63), nullable=False)
+    surname = Column(String(63), nullable=False)
+    phone_number = Column(String(15), nullable=False)
+    total_price = Column(Float, nullable=False)
+    status = Column(Enum('pending', 'processing', 'shipped', 'delivered', 'canceled'), default='pending')
+    payment_status = Column(Enum('paid', 'unpaid', 'failed', 'refunded'), default='unpaid')
+    payment_method = Column(String(50), nullable=True)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship with OrderItems
+    order_items = relationship("OrderItem", back_populates="order")
+    
+class OrderItem(Base):
+    __tablename__ = 'order_items'
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey('orders.id'))
+    product_id = Column(Integer, ForeignKey('products.id'))
+    quantity = Column(Integer, nullable=False)
+    price_at_purchase = Column(Float, nullable=False)
+
+    # Relationship with Orders
+    order = relationship("Order", back_populates="order_items")
