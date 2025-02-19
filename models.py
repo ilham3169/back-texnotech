@@ -122,7 +122,11 @@ class Order(Base):
     __tablename__ = 'orders'
     
     id = Column(Integer, primary_key=True, index=True)
+<<<<<<< Updated upstream
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=True)  # Make user_id nullable
+=======
+    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=True)  
+>>>>>>> Stashed changes
     name = Column(String(63), nullable=False)
     surname = Column(String(63), nullable=False)
     phone_number = Column(String(15), nullable=False)
@@ -135,7 +139,13 @@ class Order(Base):
 
     # Relationship with OrderItems
     order_items = relationship("OrderItem", back_populates="order")
+<<<<<<< Updated upstream
     
+=======
+
+
+
+>>>>>>> Stashed changes
 class OrderItem(Base):
     __tablename__ = 'order_items'
 
@@ -146,4 +156,9 @@ class OrderItem(Base):
     price_at_purchase = Column(Float, nullable=False)
 
     # Relationship with Orders
+<<<<<<< Updated upstream
     order = relationship("Order", back_populates="order_items")
+=======
+    order = relationship("Order", back_populates="order_items")
+
+>>>>>>> Stashed changes
