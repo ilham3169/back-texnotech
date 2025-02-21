@@ -271,3 +271,9 @@ class OrderResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class OrderPaymentUpdate(BaseModel):
+    payment_status: str
+
+class OrderStatusUpdate(BaseModel):
+    status: str
