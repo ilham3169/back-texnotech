@@ -209,6 +209,7 @@ class OrderCreate(OrderBase):
 
 # ---- OrderItem Schemas ---- #
 class OrderItemBase(BaseModel):
+    order_id: int
     product_id: int
     quantity: int
     price_at_purchase: float

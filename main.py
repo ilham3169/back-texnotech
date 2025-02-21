@@ -6,7 +6,7 @@ import os
 
 from redis import Redis
 
-from routers import products, brands, category, p_specification, specifications, images, others, orders
+from routers import products, brands, category, p_specification, specifications, images, others, orders, order_items
 from routers.auth import auth
 from aws import s3
 
@@ -17,7 +17,8 @@ app.add_middleware(
     allow_origins=["https://texnotech.vercel.app", 
                    "https://admin-texnotech.vercel.app", 
                    "http://127.0.0.1:5173",
-                   "http://localhost:5173"],  # Allow only your frontend domain
+                   "http://localhost:5173",
+                   "http://localhost:5174",],  # Allow only your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],  # Allow all headers
@@ -50,3 +51,4 @@ app.include_router(images.router)
 app.include_router(s3.router)
 app.include_router(others.router)
 app.include_router(orders.router)
+app.include_router(order_items.router)
