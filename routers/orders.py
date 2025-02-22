@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response  # type:
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.sql.expression import text  # type: ignore
 from database import sessionLocal
-from models import Product, Order
+from models import Product, Order, OrderItem
 from schemas import OrderWithItems, OrderResponse, OrderCreate, OrderPaymentUpdate, OrderStatusUpdate
 import logging
 from datetime import datetime
@@ -51,9 +51,14 @@ async def create_order(order_data: OrderCreate, db: db_dependency):  # type: ign
 
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_order(order_id: int, db: db_dependency):
+
     order = db.query(Order).filter(Order.id == order_id).first()
+    order_items = db.query(OrderItem).filter(OrderItem.order_id == order_id).first()
+
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    
+    db.delete(order_items)
     db.delete(order)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
