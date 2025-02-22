@@ -53,13 +53,15 @@ async def create_order(order_data: OrderCreate, db: db_dependency):  # type: ign
 async def delete_order(order_id: int, db: db_dependency):
 
     order = db.query(Order).filter(Order.id == order_id).first()
-    order_items = db.query(OrderItem).filter(OrderItem.order_id == order_id).first()
+    order_items = db.query(OrderItem).filter(OrderItem.order_id == order_id).all()
 
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
     
-    db.delete(order_items)
+    for j in order_items:
+        db.delete(j)
     db.delete(order)
+    
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
