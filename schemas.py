@@ -88,19 +88,23 @@ class ProductBase(BaseModel):
     author_id: int
     is_super: bool
     is_new: bool
+    is_active: bool = True  # Default to True, but keep as required in base
+
+    class Config:
+        orm_mode = True
 
 class ProductCreate(ProductBase):
     pass
-
 
 class ProductResponse(ProductBase):
     id: int
     date_created: datetime
     updated_at: datetime
+    is_active: Optional[bool] = True  # Make optional with a default value
 
     class Config:
-        orm_mode = True 
-    
+        orm_mode = True
+
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     category_id: Optional[int] = None 
@@ -114,6 +118,10 @@ class ProductUpdate(BaseModel):
     author_id: Optional[int] = None  
     is_super: Optional[bool] = None
     is_new: Optional[bool] = None
+    is_active: Optional[bool] = None  # Already optional here
+
+    class Config:
+        orm_mode = True
 
 # Specification Schemas
 class SpecificationBase(BaseModel):

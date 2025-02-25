@@ -77,6 +77,7 @@ class Product(Base):
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_super = Column(Boolean, nullable=False, default=False)
     is_new = Column(Boolean, nullable=False, default=False)
+    is_active = Column(Boolean, nullable=False, default=True)
 
 
     category = relationship("Category", back_populates="products")
