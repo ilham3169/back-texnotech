@@ -8,7 +8,7 @@ from sqlalchemy import and_
 import logging
 
 import pytz
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from redis import Redis
 
@@ -133,13 +133,26 @@ async def get_all_products(
             if category_id:
                 query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
             else:
-                print(2)
                 query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
 
             products = query.all()
 
         fill_cache_products(products, redis)
 
+    return products
+
+
+@router.get("/new-arrivals", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
+async def get_new_products(
+        db: db_dependency,
+    ):
+
+    products = db.query(
+        Product
+        ).filter(Product.date_created > (datetime.now() - timedelta(days=7))
+        ).order_by(text("date_created DESC")
+        ).limit(10).all()
+    
     return products
 
 
