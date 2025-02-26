@@ -18,7 +18,8 @@ app.add_middleware(
                    "https://admin-texnotech.vercel.app", 
                    "http://127.0.0.1:5173",
                    "http://localhost:5173",
-                   "http://localhost:5174",],  # Allow only your frontend domain
+                   "http://localhost:5174",
+                   "https://texnotech.com"],  # Allow only your frontend domain
     allow_credentials=True,
     allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],  # Allow all headers
