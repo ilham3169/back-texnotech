@@ -56,9 +56,6 @@ class CategoryResponse(CategoryBase):
 # Brand Schemas
 class BrandBase(BaseModel):
     name: str
-    num_brand: Optional[int] = 0
-    is_active: Optional[bool] = False
-    image_link: str
 
 
 class BrandCreate(BrandBase):

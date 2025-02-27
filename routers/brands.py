@@ -66,12 +66,11 @@ async def update_brand(brand_id: int, brand_data: BrandCreate, db: db_dependency
 @router.post("/add", response_model=BrandResponse, status_code=status.HTTP_201_CREATED)
 async def create_brand(brand_data: BrandCreate, db: db_dependency): # type: ignore
     
-    # Checking ID of Brand
-    brend = db.query(Brand).filter(Brand.id == brand_data.id).first()               
+    brend = db.query(Brand).filter(Brand.name == brand_data.name).first()               
     if brend:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Brand with id {brand_data.id} exists. Existed brand name -> xxx"
+            detail=f"Brand with name {brand_data.name} exists. Existed brand name -> xxx"
         )
     
     new_brand = Brand(**brand_data.dict())

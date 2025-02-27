@@ -53,7 +53,7 @@ class Brand(Base):
     name = Column(String(63), nullable=False, unique=True)
     num_brend = Column(Integer, nullable=False, default=0)
     date_created = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    is_active = Column(Boolean, nullable=False, default=False)
+    is_active = Column(Boolean, nullable=False, default=True)
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     image_link = Column(String(255), nullable=False)
 
