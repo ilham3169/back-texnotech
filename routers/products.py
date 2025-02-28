@@ -48,9 +48,16 @@ async def get_all_products(
         discount: Optional[bool] = Query(None),
         max_price: Optional[float] = Query(None),
         search_query: Optional[str] = Query(None),
+        page: Optional[int] = Query(None, ge=1), 
+        page_size: Optional[int] = Query(None, ge=1, le=100)
         ): 
     
     try:
+
+        if (page and page_size):
+            offset = (page - 1) * page_size
+        else:
+            offset = 0
         
         # If there are products' data in cache and there is not any filter
         cached_products_keys= redis.keys("product:*")
@@ -71,19 +78,32 @@ async def get_all_products(
 
             # Get products' data tom cache
             products = []
-            for key in cached_products_keys:
+            # Sort keys to maintain consistent ordering
+            cached_products_keys.sort()
+            # Apply pagination to cached keys
+            if page_size:
+                product_keys = cached_products_keys[offset:offset + page_size]
+            else:
+                product_keys = cached_products_keys
+
+            for key in product_keys:
                 product = redis.hgetall(key)
                 decoded_product = {k.decode('utf-8'): v.decode('utf-8') for k, v in product.items()}
-
                 products.append(decoded_product)
 
             return products
         # If there is a search query
         elif search_query:
-            query = db.query(Product).filter(Product.search_string.ilike(f"%{search_query}%"))
-            product = query.all()
+            query = db.query(Product).filter(Product.search_string.ilike(f"%{search_query}%"))\
+                .order_by(text("date_created DESC"))\
+                .offset(offset)
+            
+            if page_size:
+                products = query.limit(page_size).all()
+            else:
+                products = query.all()
 
-            return product
+            return products
 
         # If no products' data in cache
         else:
@@ -101,12 +121,14 @@ async def get_all_products(
             )
             
             if category_id:
-                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
+                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC")).offset(offset)
             else:
-                print(1)
-                query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
+                query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC")).offset(offset)
             
-            products = query.all()
+            if page_size:
+                products = query.limit(page_size).all()
+            else:
+                products = query.all()
 
             fill_cache_products(products, redis)
             return products
@@ -116,7 +138,9 @@ async def get_all_products(
 
         # Check if there any filters
         if not (category_id or brand_id or available or discount or max_price):
-            products = db.query(Product).order_by(text("date_created DESC")).all()
+            query = db.query(Product)\
+                .order_by(text("date_created DESC"))\
+                .offset(offset)
         else:
             if category_id:
                 categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
@@ -131,15 +155,21 @@ async def get_all_products(
             )
 
             if category_id:
-                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC"))
+                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters)\
+                    .order_by(text("date_created DESC"))\
+                    .offset(offset)
             else:
-                query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC"))
+                query = db.query(Product).filter(and_(*filters))\
+                    .order_by(text("date_created DESC"))\
+                    .offset(offset)
 
+        if page_size:
+            products = query.limit(page_size).all()
+        else:
             products = query.all()
 
         fill_cache_products(products, redis)
-
-    return products
+        return products
 
 
 @router.get("/new-arrivals", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
