@@ -76,7 +76,7 @@ class ProductBase(BaseModel):
     name: str
     category_id: int
     price: int
-    num_product: int = 0  # Default value is set to 0, no need for Optional
+    num_product: int = 0  # Default value is set to 0
     image_link: str
     brend_id: int  # Use brend_id here to match the SQLAlchemy model
     model_name: str
@@ -85,10 +85,10 @@ class ProductBase(BaseModel):
     author_id: int
     is_super: bool
     is_new: bool
-    is_active: bool = True  # Default to True, but keep as required in base
+    is_active: bool = True  # Default to True, but keep as required
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Replace orm_mode = True with from_attributes = True
 
 class ProductCreate(ProductBase):
     pass
@@ -100,7 +100,7 @@ class ProductResponse(ProductBase):
     is_active: Optional[bool] = True  # Make optional with a default value
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Replace orm_mode = True with from_attributes = True
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -118,8 +118,8 @@ class ProductUpdate(BaseModel):
     is_active: Optional[bool] = None  # Already optional here
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True  # Replace orm_mode = True with from_attributes = True
+        
 # Specification Schemas
 class SpecificationBase(BaseModel):
     name: str
