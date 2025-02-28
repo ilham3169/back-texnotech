@@ -185,6 +185,20 @@ async def get_new_products(
     
     return products
 
+@router.get("/is_super", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
+async def get_super_products(
+        db: db_dependency,
+    ):
+
+    products = db.query(
+        Product
+        ).filter(Product.is_super
+        ).order_by(text("date_created DESC")
+        ).limit(10).all()
+    
+    return products
+
+
 
 @router.get("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
 async def get_product(product_id: int, db: db_dependency): # type: ignore
