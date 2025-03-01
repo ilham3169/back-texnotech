@@ -39,121 +39,47 @@ TIMEZONE = pytz.timezone("Asia/Baku")
 
 @router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
 async def get_all_products(
-        db: db_dependency, 
-        redis: redis_dependency,
-
-        category_id: Optional[int] = Query(None), 
-        brand_id: Optional[int] = Query(None),
-        available: Optional[bool] = Query(None),
-        discount: Optional[bool] = Query(None),
-        max_price: Optional[float] = Query(None),
-        search_query: Optional[str] = Query(None),
-        page: Optional[int] = Query(None, ge=1), 
-        page_size: Optional[int] = Query(None, ge=1, le=100)
-        ): 
-    
+    db: db_dependency, 
+    redis: redis_dependency,
+    category_id: Optional[int] = Query(None), 
+    brand_id: Optional[int] = Query(None),
+    available: Optional[bool] = Query(None),
+    discount: Optional[bool] = Query(None),
+    max_price: Optional[float] = Query(None),
+    search_query: Optional[str] = Query(None),
+    page: Optional[int] = Query(None, ge=1), 
+    page_size: Optional[int] = Query(None, ge=1, le=100)
+):
+    logger.info(f"Request: page={page}, page_size={page_size}")
     try:
+        # Clear Redis cache before every request
+        redis.flushall()
+        logger.info("Redis cache cleared")
 
         if (page and page_size):
             offset = (page - 1) * page_size
         else:
             offset = 0
         
-        # If there are products' data in cache and there is not any filter
-        cached_products_keys= redis.keys("product:*")
-        if cached_products_keys and not (category_id or brand_id or available or discount or max_price or search_query):
-
-            baku_timezone = pytz.timezone("Asia/Baku")
-
-            # Get the current time in the Baku timezone
-            baku_time = datetime.now(baku_timezone).hour
-            # CLear & refill the cached data at 8 AM everyday
-            if baku_time == 8:
-
-                products = db.query(Product).order_by(text("date_created DESC")).all()
-
-                fill_cache_products(products, redis)
-
-                return products
-
-            # Get products' data tom cache
-            products = []
-            # Sort keys to maintain consistent ordering
-            cached_products_keys.sort()
-            # Apply pagination to cached keys
-            if page_size:
-                product_keys = cached_products_keys[offset:offset + page_size]
-            else:
-                product_keys = cached_products_keys
-
-            for key in product_keys:
-                product = redis.hgetall(key)
-                decoded_product = {k.decode('utf-8'): v.decode('utf-8') for k, v in product.items()}
-                products.append(decoded_product)
-
-            return products
-        # If there is a search query
-        elif search_query:
+        # Since Redis is cleared, skip the caching check
+        if search_query:
             query = db.query(Product).filter(Product.search_string.ilike(f"%{search_query}%"))\
                 .order_by(text("date_created DESC"))\
                 .offset(offset)
-            
-            if page_size:
-                products = query.limit(page_size).all()
-            else:
-                products = query.all()
-
-            return products
-
-        # If no products' data in cache
-        else:
-            # Get filters (if available)
-            if category_id:
-                categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
-                category_ids = [category.id for category in categories]
-                category_ids.append(category_id)
-
-            filters = check_filters_products(
-                brand_id,
-                available,
-                discount,
-                max_price,
-            )
-            
-            if category_id:
-                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters).order_by(text("date_created DESC")).offset(offset)
-            else:
-                query = db.query(Product).filter(and_(*filters)).order_by(text("date_created DESC")).offset(offset)
-            
-            if page_size:
-                products = query.limit(page_size).all()
-            else:
-                products = query.all()
-
+            products = query.limit(page_size).all() if page_size else query.all()
+            logger.info(f"Search query, fetched {len(products)} products")
             fill_cache_products(products, redis)
             return products
-    
-    # In case of any error, retrieve data from database
-    except Exception as e:
 
-        # Check if there any filters
-        if not (category_id or brand_id or available or discount or max_price):
-            query = db.query(Product)\
-                .order_by(text("date_created DESC"))\
-                .offset(offset)
         else:
             if category_id:
                 categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
                 category_ids = [category.id for category in categories]
                 category_ids.append(category_id)
-
-            filters = check_filters_products(
-                brand_id,
-                available,
-                discount,
-                max_price,
-            )
-
+                logger.info(f"Category IDs: {category_ids}")
+            filters = check_filters_products(brand_id, available, discount, max_price)
+            logger.info(f"Filters applied: {filters}")
+            
             if category_id:
                 query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters)\
                     .order_by(text("date_created DESC"))\
@@ -162,12 +88,34 @@ async def get_all_products(
                 query = db.query(Product).filter(and_(*filters))\
                     .order_by(text("date_created DESC"))\
                     .offset(offset)
-
-        if page_size:
-            products = query.limit(page_size).all()
+            
+            logger.info(f"Query: {str(query)}")
+            products = query.limit(page_size).all() if page_size else query.all()
+            logger.info(f"Fetched {len(products)} products")
+            fill_cache_products(products, redis)
+            return products
+    
+    except Exception as e:
+        logger.error(f"Exception: {str(e)}")
+        # Clear Redis in case of exception too
+        redis.flushall()
+        logger.info("Redis cache cleared in exception block")
+        # Repeat logic
+        if category_id:
+            categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
+            category_ids = [category.id for category in categories]
+            category_ids.append(category_id)
+        filters = check_filters_products(brand_id, available, discount, max_price)
+        if category_id:
+            query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters)\
+                .order_by(text("date_created DESC"))\
+                .offset(offset)
         else:
-            products = query.all()
-
+            query = db.query(Product).filter(and_(*filters))\
+                .order_by(text("date_created DESC"))\
+                .offset(offset)
+        products = query.limit(page_size).all() if page_size else query.all()
+        logger.info(f"Exception block fetched {len(products)} products")
         fill_cache_products(products, redis)
         return products
 
