@@ -86,6 +86,7 @@ async def update_p_specification(p_specification_id: int, p_specification_data: 
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="Product specification not found with the specified ID."
         )
+    
 
     product = db.query(Product).filter(Product.id == p_specification_data.product_id).first()
     if not product:

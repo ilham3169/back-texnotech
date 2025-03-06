@@ -8,7 +8,7 @@ from datetime import datetime
 import pytz 
 
 from database import sessionLocal
-from models import Category, Specification
+from models import Category, Specification, Product
 from schemas import BrandResponse, BrandBase, BrandCreate, CategoryResponse, CategoryBase, CategoryCreate
 
 
@@ -51,14 +51,20 @@ async def get_category(category_id: int, db: db_dependency): # type: ignore
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_category(category_id: int, db: db_dependency): # type: ignore
-
+async def delete_category(category_id: int, db: db_dependency):
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     
-    db.delete(category)
-    db.commit()
+    try:
+        db.query(Specification).filter(Specification.category_id == category_id).delete(synchronize_session=False)
+        db.query(Product).filter(Product.category_id == category_id).delete(synchronize_session=False)
+        db.delete(category)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting category: {str(e)}")
+    
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.post("/add", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
