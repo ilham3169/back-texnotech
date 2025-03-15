@@ -53,6 +53,20 @@ async def delete_p_specification(p_specification_id: int, db: db_dependency): # 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@router.delete("/product/{product_id}/{spec_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_p_specification_spec(product_id: int, spec_id: int, db: db_dependency): # type: ignore
+    p_specification = db.query(ProductSpecification)\
+        .filter(ProductSpecification.product_id == product_id,
+                ProductSpecification.specification_id == spec_id)\
+            .first()
+    if not p_specification:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product Specification not found")
+    
+    db.delete(p_specification)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 
 @router.post("", response_model=ProductSpecificationResponse, status_code=status.HTTP_201_CREATED)
 async def create_product_specification(p_specification_data: ProductSpecificationCreate, db: db_dependency):  # type: ignore
