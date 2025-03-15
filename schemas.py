@@ -42,6 +42,10 @@ class CategoryCreate(CategoryBase):
     pass
 
 
+class ChildCategoryCreate(CategoryBase):
+    parent_category_id: int
+
+
 class CategoryResponse(CategoryBase):
     id: int
     parent_category_id: Optional[int] = None

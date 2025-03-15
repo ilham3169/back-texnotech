@@ -9,7 +9,7 @@ import pytz
 
 from database import sessionLocal
 from models import Category, Specification, Product
-from schemas import BrandResponse, BrandBase, BrandCreate, CategoryResponse, CategoryBase, CategoryCreate
+from schemas import CategoryResponse, CategoryBase, CategoryCreate, ChildCategoryCreate
 
 
 TIMEZONE = pytz.timezone("Asia/Baku")
@@ -67,6 +67,7 @@ async def delete_category(category_id: int, db: db_dependency):
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+
 @router.post("/add", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 async def create_category(category_data: CategoryCreate, db: db_dependency): # type: ignore
     
@@ -88,6 +89,30 @@ async def create_category(category_data: CategoryCreate, db: db_dependency): # t
     db.commit()
     db.refresh(new_category)
     return new_category
+
+
+@router.post("/child/add", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
+async def create_child_category(category_data: ChildCategoryCreate, db: db_dependency): # type: ignore
+    
+    category = db.query(Category).filter(Category.name == category_data.name).first()               
+    if category:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Category with name {category_data.name} exists."
+        )
+    
+    if category_data.num_category < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Category number cannot be negative"
+        )
+    
+    new_category = Category(**category_data.dict())
+    db.add(new_category)
+    db.commit()
+    db.refresh(new_category)
+    return new_category
+
 
 @router.put("/{category_id}", response_model=CategoryResponse, status_code=status.HTTP_200_OK)
 async def update_category(category_id: int, category_data: CategoryBase, db: db_dependency): # type: ignore
