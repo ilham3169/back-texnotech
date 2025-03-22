@@ -27,8 +27,8 @@ class UserResponse(UserBase):
     updated_at: datetime
     is_active: Optional[bool] = True
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
+
 
 
 # Category Schemas
@@ -53,8 +53,8 @@ class CategoryResponse(CategoryBase):
     updated_at: datetime
     icon_image_link: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 
 # Brand Schemas
@@ -71,8 +71,7 @@ class BrandResponse(BrandBase):
     date_created: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 # Product Schemas
@@ -91,8 +90,7 @@ class ProductBase(BaseModel):
     is_new: bool
     is_active: bool = True  # Default to True, but keep as required
 
-    class Config:
-        from_attributes = True  # Replace orm_mode = True with from_attributes = True
+    model_config = {"from_attributes": True}
 
 class ProductCreate(ProductBase):
     pass
@@ -103,8 +101,7 @@ class ProductResponse(ProductBase):
     updated_at: datetime
     is_active: Optional[bool] = True  # Make optional with a default value
 
-    class Config:
-        from_attributes = True  # Replace orm_mode = True with from_attributes = True
+    model_config = {"from_attributes": True}
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -121,9 +118,8 @@ class ProductUpdate(BaseModel):
     is_new: Optional[bool] = None
     is_active: Optional[bool] = None  # Already optional here
 
-    class Config:
-        from_attributes = True  # Replace orm_mode = True with from_attributes = True
-        
+    model_config = {"from_attributes": True}
+    
 # Specification Schemas
 class SpecificationBase(BaseModel):
     name: str
@@ -137,8 +133,8 @@ class SpecificationCreate(SpecificationBase):
 class SpecificationResponse(SpecificationBase):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 
 # Product Specification Schemas
@@ -160,8 +156,8 @@ class ProductSpecificationCreate(ProductSpecificationBase):
 class ProductSpecificationResponse(ProductSpecificationBase):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 
 # Image Schemas
@@ -178,8 +174,8 @@ class ImageResponse(BaseModel):
     image_link: str
     product_id: Optional[int] = None
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 # JWT Token Schemas
 class Token(BaseModel):
@@ -232,8 +228,8 @@ class OrderItem(OrderItemBase):
     id: int
     order_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 
 # ---- Order Response Schemas ---- #
@@ -242,15 +238,15 @@ class Order(OrderBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 
 class OrderWithItems(Order):
     order_items: List[OrderItem]
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 
 class OrderItemResponse(BaseModel):
@@ -260,8 +256,8 @@ class OrderItemResponse(BaseModel):
     quantity: int
     price_at_purchase: float
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 
 class OrderResponse(BaseModel):
@@ -278,8 +274,8 @@ class OrderResponse(BaseModel):
     updated_at: datetime
     order_items: List[OrderItemResponse]
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
+
 
 class OrderPaymentUpdate(BaseModel):
     payment_status: str
