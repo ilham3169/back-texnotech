@@ -41,7 +41,6 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2
 multidict==6.1.0
-mysqlclient==2.2.6
 oauthlib==3.2.2
 orjson==3.10.2
 passlib==1.7.4
