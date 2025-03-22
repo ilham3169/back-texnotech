@@ -36,6 +36,15 @@ redis_dependency = Annotated[Redis, Depends(get_redis)]
 logger = logging.getLogger("uvicorn.error")
 TIMEZONE = pytz.timezone("Asia/Baku")
 
+@router.get("/num-products", status_code=status.HTTP_200_OK)
+async def get_num_products(db: db_dependency):
+    num_products = db.query(Product).count()
+    return num_products
+
+@router.get("/num-products-new", status_code=status.HTTP_200_OK)
+async def get_num_products(db: db_dependency):
+    num_products = db.query(Product).filter(Product.is_new).count()
+    return num_products
 
 @router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
 async def get_all_products(
@@ -235,3 +244,4 @@ async def delete_product(product_id: int, db: db_dependency, redis: redis_depend
     db.commit()
     redis.flushall()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
