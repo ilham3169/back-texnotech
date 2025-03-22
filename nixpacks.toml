@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python312", "pkg-config", "mariadb"]
+nixPkgs = ["python312", "pkg-config", "mariadb", "mariadb-connector-c", "mariadb-connector-c-dev"]
 
 [phases.build]
 cmds = ["pip install -r requirements.txt"]
