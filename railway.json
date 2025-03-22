@@ -1,3 +1,0 @@
-{
-    "postinstall": "./preinstall.sh"
-}
