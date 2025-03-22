@@ -30,7 +30,6 @@ class UserResponse(UserBase):
     model_config = {"from_attributes": True}
 
 
-
 # Category Schemas
 class CategoryBase(BaseModel):
     name: str
@@ -56,7 +55,6 @@ class CategoryResponse(CategoryBase):
     model_config = {"from_attributes": True}
 
 
-
 # Brand Schemas
 class BrandBase(BaseModel):
     name: str
@@ -79,29 +77,30 @@ class ProductBase(BaseModel):
     name: str
     category_id: int
     price: int
-    num_product: int = 0  # Default value is set to 0
-    image_link: str
-    brend_id: int  # Use brend_id here to match the SQLAlchemy model
-    model_name: str
+    num_product: int = 0
+    image_link: Optional[str] = None  # Align with nullable=True
+    brend_id: int
+    product_model: str
     discount: int
     search_string: str
     author_id: int
     is_super: bool
-    is_new: bool
-    is_active: bool = True  # Default to True, but keep as required
-
+    is_new: Optional[bool] = False  # Align with nullable=True
+    is_active: Optional[bool] = True  # Already optional, aligns with nullable=True
     model_config = {"from_attributes": True}
+
 
 class ProductCreate(ProductBase):
     pass
+
 
 class ProductResponse(ProductBase):
     id: int
     date_created: datetime
     updated_at: datetime
-    is_active: Optional[bool] = True  # Make optional with a default value
-
+    is_active: Optional[bool] = True
     model_config = {"from_attributes": True}
+
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -110,16 +109,16 @@ class ProductUpdate(BaseModel):
     num_product: Optional[int] = None
     image_link: Optional[str] = None
     brend_id: Optional[int] = None 
-    model_name: Optional[str] = None
+    product_model: Optional[str] = None
     discount: Optional[int] = None  
     search_string: Optional[str] = None
     author_id: Optional[int] = None  
     is_super: Optional[bool] = None
     is_new: Optional[bool] = None
-    is_active: Optional[bool] = None  # Already optional here
-
+    is_active: Optional[bool] = None
     model_config = {"from_attributes": True}
-    
+
+
 # Specification Schemas
 class SpecificationBase(BaseModel):
     name: str
@@ -134,7 +133,6 @@ class SpecificationResponse(SpecificationBase):
     id: int
 
     model_config = {"from_attributes": True}
-
 
 
 # Product Specification Schemas
@@ -159,7 +157,6 @@ class ProductSpecificationResponse(ProductSpecificationBase):
     model_config = {"from_attributes": True}
 
 
-
 # Image Schemas
 class ImageBase(BaseModel):
     image_link: str
@@ -168,6 +165,7 @@ class ImageBase(BaseModel):
 
 class ImageCreate(ImageBase):
     pass
+
 
 class ImageResponse(BaseModel):
     id: int
@@ -193,7 +191,6 @@ class EmailSchema(BaseModel):
 class PasswordResetConfirmModel(BaseModel):
     new_password: str
     confirm_new_password: str
-
 
 
 # ---- Order Base Schemas ---- #
@@ -231,7 +228,6 @@ class OrderItem(OrderItemBase):
     model_config = {"from_attributes": True}
 
 
-
 # ---- Order Response Schemas ---- #
 class Order(OrderBase):
     id: int
@@ -241,12 +237,10 @@ class Order(OrderBase):
     model_config = {"from_attributes": True}
 
 
-
 class OrderWithItems(Order):
     order_items: List[OrderItem]
 
     model_config = {"from_attributes": True}
-
 
 
 class OrderItemResponse(BaseModel):
@@ -257,7 +251,6 @@ class OrderItemResponse(BaseModel):
     price_at_purchase: float
 
     model_config = {"from_attributes": True}
-
 
 
 class OrderResponse(BaseModel):
@@ -279,6 +272,7 @@ class OrderResponse(BaseModel):
 
 class OrderPaymentUpdate(BaseModel):
     payment_status: str
+
 
 class OrderStatusUpdate(BaseModel):
     status: str

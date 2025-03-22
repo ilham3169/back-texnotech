@@ -1,7 +1,7 @@
-from sqlalchemy import ( # type: ignore
+from sqlalchemy import (  # type: ignore
     Boolean, Column, Integer, String, DateTime, Enum, ForeignKey, TIMESTAMP, text, Float
 )
-from sqlalchemy.orm import relationship # type: ignore
+from sqlalchemy.orm import relationship  # type: ignore
 from database import Base
 from datetime import datetime
 
@@ -40,8 +40,7 @@ class Category(Base):
     is_active = Column(Boolean, nullable=False, default=False)
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     icon_image_link = Column(String(511), nullable=False)
-    parent_category_id = Column(Integer, nullable = True, unique = True, default = None)
-
+    parent_category_id = Column(Integer, nullable=True, unique=True, default=None)
 
     products = relationship("Product", back_populates="category")
 
@@ -59,6 +58,7 @@ class Brand(Base):
 
     products = relationship("Product", back_populates="brend")
 
+
 class Product(Base):
     __tablename__ = "products"
 
@@ -67,24 +67,24 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     price = Column(Integer, nullable=False)
     num_product = Column(Integer, nullable=False, default=0)
-    image_link = Column(String(255), nullable=False)
-    brend_id = Column(Integer, ForeignKey("brends.id"), nullable=False)  # Ensure this is correct
-    model_name = Column(String(127), nullable=False)
+    image_link = Column(String(255), nullable=True)  # Fixed mismatch
+    brend_id = Column(Integer, ForeignKey("brends.id"), nullable=False)
+    product_model = Column(String(127), nullable=False)  # Renamed from model_name
     discount = Column(Integer, nullable=False)
     date_created = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     search_string = Column(String(511), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_super = Column(Boolean, nullable=False, default=False)
-    is_new = Column(Boolean, nullable=False, default=False)
-    is_active = Column(Boolean, nullable=False, default=True)
-
+    is_new = Column(Boolean, nullable=True, default=False)  # Fixed mismatch
+    is_active = Column(Boolean, nullable=True, default=True)  # Fixed mismatch
 
     category = relationship("Category", back_populates="products")
-    brend = relationship("Brand", back_populates="products")  # Ensure this is correct
+    brend = relationship("Brand", back_populates="products")
     author = relationship("User", back_populates="products")
     specifications = relationship("ProductSpecification", back_populates="product")
     images = relationship("Image", back_populates="product", cascade="all, delete-orphan")
+
 
 class Specification(Base):
     __tablename__ = "specifications"
@@ -115,7 +115,6 @@ class Image(Base):
     image_link = Column(String(511), nullable=False)
     product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=True)
 
-    # Relationships
     product = relationship("Product", back_populates="images")
 
 
@@ -134,8 +133,8 @@ class Order(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationship with OrderItems
     order_items = relationship("OrderItem", back_populates="order")
+
 
 class OrderItem(Base):
     __tablename__ = 'order_items'
@@ -146,5 +145,4 @@ class OrderItem(Base):
     quantity = Column(Integer, nullable=False)
     price_at_purchase = Column(Float, nullable=False)
 
-    # Relationship with Orders
     order = relationship("Order", back_populates="order_items")
