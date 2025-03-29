@@ -16,6 +16,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://texnotech.vercel.app", 
                    "https://admin-texnotech.vercel.app", 
+                   "https://admin-texnotech-3nyw.vercel.app/",
                    "http://127.0.0.1:5173",
                    "http://localhost:5173",
                    "http://localhost:5174",
