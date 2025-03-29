@@ -14,17 +14,18 @@ from aws import s3
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://texnotech.vercel.app", 
-                   "https://admin-texnotech.vercel.app", 
-                   "https://admin-texnotech-3nyw.vercel.app/",
-                   "http://127.0.0.1:5173",
-                   "http://localhost:5173",
-                   "http://localhost:5174",
-                   "https://github.com/ilham3169/back-texnotech.git"
-                   "https://texnotech.com"],  # Allow only your frontend domain
+    allow_origins=[
+        "https://texnotech.vercel.app",
+        "https://admin-texnotech.vercel.app",
+        "https://admin-texnotech-3nyw.vercel.app",
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://texnotech.com"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
