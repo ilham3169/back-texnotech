@@ -65,7 +65,7 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(127), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
-    price = Column(Integer, nullable=False)
+    price = Column(Float, nullable=False)
     num_product = Column(Integer, nullable=False, default=0)
     image_link = Column(String(255), nullable=False)
     brend_id = Column(Integer, ForeignKey("brends.id"), nullable=False)  # Ensure this is correct

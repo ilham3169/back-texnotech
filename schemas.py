@@ -79,7 +79,7 @@ class BrandResponse(BrandBase):
 class ProductBase(BaseModel):
     name: str
     category_id: int
-    price: int
+    price: float
     num_product: int = 0  # Default value is set to 0
     image_link: str
     brend_id: int  # Use brend_id here to match the SQLAlchemy model
@@ -109,7 +109,7 @@ class ProductResponse(ProductBase):
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     category_id: Optional[int] = None 
-    price: Optional[int] = None  
+    price: Optional[float] = None  
     num_product: Optional[int] = None
     image_link: Optional[str] = None
     brend_id: Optional[int] = None 
