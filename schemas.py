@@ -84,7 +84,7 @@ class ProductBase(BaseModel):
     image_link: str
     brend_id: int  # Use brend_id here to match the SQLAlchemy model
     model_name: str
-    discount: int
+    discount: float
     search_string: str
     author_id: int
     is_super: bool
@@ -114,7 +114,7 @@ class ProductUpdate(BaseModel):
     image_link: Optional[str] = None
     brend_id: Optional[int] = None 
     model_name: Optional[str] = None
-    discount: Optional[int] = None  
+    discount: Optional[float] = None  
     search_string: Optional[str] = None
     author_id: Optional[int] = None  
     is_super: Optional[bool] = None

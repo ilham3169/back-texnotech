@@ -70,7 +70,7 @@ class Product(Base):
     image_link = Column(String(255), nullable=False)
     brend_id = Column(Integer, ForeignKey("brends.id"), nullable=False)  # Ensure this is correct
     model_name = Column(String(127), nullable=False)
-    discount = Column(Integer, nullable=False)
+    discount = Column(Float, nullable=False)
     date_created = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     search_string = Column(String(511), nullable=False)
