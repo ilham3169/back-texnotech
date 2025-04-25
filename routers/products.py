@@ -61,24 +61,38 @@ async def get_all_products(
 ):
     logger.info(f"Request: page={page}, page_size={page_size}")
     try:
-        # Clear Redis cache before every request
         redis.flushall()
         logger.info("Redis cache cleared")
 
-        if (page and page_size):
+        if page and page_size:
             offset = (page - 1) * page_size
         else:
             offset = 0
         
-        # Since Redis is cleared, skip the caching check
         if search_query:
-            query = db.query(Product).filter(Product.search_string.ilike(f"%{search_query}%"))\
-                .order_by(text("date_created DESC"))\
-                .offset(offset)
-            products = query.limit(page_size).all() if page_size else query.all()
-            logger.info(f"Search query, fetched {len(products)} products")
-            fill_cache_products(products, redis)
-            return products
+            # Check if search_query is a valid integer
+            try:
+                product_id = int(search_query)
+                # Search by product ID
+                query = db.query(Product).filter(Product.id == product_id)
+                product = query.first()
+                if product:
+                    logger.info(f"Found product with ID {product_id}")
+                    products = [product]
+                else:
+                    logger.info(f"No product found with ID {product_id}")
+                    products = []
+                fill_cache_products(products, redis)
+                return products
+            except ValueError:
+                # If search_query is not an integer, perform the original search
+                query = db.query(Product).filter(Product.search_string.ilike(f"%{search_query}%"))\
+                    .order_by(text("date_created DESC"))\
+                    .offset(offset)
+                products = query.limit(page_size).all() if page_size else query.all()
+                logger.info(f"Search query, fetched {len(products)} products")
+                fill_cache_products(products, redis)
+                return products
 
         else:
             if category_id:
@@ -106,10 +120,8 @@ async def get_all_products(
     
     except Exception as e:
         logger.error(f"Exception: {str(e)}")
-        # Clear Redis in case of exception too
         redis.flushall()
         logger.info("Redis cache cleared in exception block")
-        # Repeat logic
         if category_id:
             categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
             category_ids = [category.id for category in categories]
@@ -176,7 +188,6 @@ async def create_product(product_data: ProductCreate, db: db_dependency, redis: 
             detail=f"Category with id {product_data.category_id} does not exist."
         )
     
-    # Checking brend_id
     brend = db.query(Brand).filter(Brand.id == product_data.brend_id).first()
     if not brend:
         raise HTTPException(
@@ -198,7 +209,6 @@ async def update_product(product_id: int, product_data: ProductUpdate, db: db_de
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
-    # Update only provided fields
     update_data = product_data.dict(exclude_unset=True)
 
     if "category_id" in update_data:
