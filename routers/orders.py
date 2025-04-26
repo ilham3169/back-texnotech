@@ -39,9 +39,14 @@ async def get_order(order_id: int, db: db_dependency):  # type: ignore
     return order
 
 @router.post("/add", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
-async def create_order(order_data: OrderCreate, db: db_dependency):  # type: ignore
-    order_data_dict = order_data.dict()
-    order_data_dict['user_id'] = 1  # Hardcoded user_id, replace with actual logic if needed
+async def create_order(order_data: OrderCreate, db: 'db_dependency'):  # type: ignore
+    order_data_dict = order_data.dict(exclude_unset=True) 
+    order_data_dict['user_id'] = 1 
+
+    if 'id' in order_data_dict and order_data_dict['id'] is not None:
+        existing_order = db.query(Order).filter(Order.id == order_data_dict['id']).first()
+        if existing_order:
+            raise HTTPException(status_code=400, detail="Order ID already exists")
 
     new_order = Order(**order_data_dict)
     db.add(new_order)

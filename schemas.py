@@ -213,7 +213,7 @@ class OrderBase(BaseModel):
 
 
 class OrderCreate(OrderBase):
-    pass
+    id: Optional[int] = None
 
 
 # ---- OrderItem Schemas ---- #
