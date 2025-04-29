@@ -81,3 +81,6 @@ uvloop==0.21.0
 watchfiles==0.21.0
 websockets==12.0
 yarl==1.18.3
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
