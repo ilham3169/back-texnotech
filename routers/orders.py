@@ -70,7 +70,7 @@ async def delete_order(order_id: int, db: db_dependency):
     order_items = db.query(OrderItem).filter(OrderItem.order_id == order_id).all()
 
     if not order:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found") 
     
     for j in order_items:
         db.delete(j)
