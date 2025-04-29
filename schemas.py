@@ -208,7 +208,7 @@ class OrderBase(BaseModel):
     total_price: float
     status: Optional[str] = "pending"
     status: Optional[Literal["pending", "processing", "shipped", "delivered", "canceled"]] = "pending"
-    payment_status: Optional[str] = "unpaid"
+    payment_status: Optional[str] = "unpaid" 
     payment_method: Optional[str] = None
 
 

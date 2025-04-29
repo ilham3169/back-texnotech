@@ -26,10 +26,19 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 logger = logging.getLogger("uvicorn.error")
 
+
+
+
+
 @router.get("", response_model=List[OrderWithItems])
 def get_orders(db: Session = Depends(get_db)):
     db_orders = db.query(Order).all()
     return db_orders
+
+@router.get("/num-orders", status_code=status.HTTP_200_OK)
+async def get_num_orders(db: db_dependency):
+    num_orders = db.query(Order).count()
+    return num_orders
 
 @router.get("/{order_id}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 async def get_order(order_id: int, db: db_dependency):  # type: ignore
