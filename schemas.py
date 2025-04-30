@@ -279,6 +279,7 @@ class OrderResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     order_items: List[OrderItemResponse]
+    delivery_method: str
 
     class Config:
         orm_mode = True
