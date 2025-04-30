@@ -133,6 +133,8 @@ class Order(Base):
     payment_method = Column(String(50), nullable=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    delivery_method = Column(String(63), nullable=False)
+
 
     # Relationship with OrderItems
     order_items = relationship("OrderItem", back_populates="order")

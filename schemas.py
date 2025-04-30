@@ -210,6 +210,8 @@ class OrderBase(BaseModel):
     status: Optional[Literal["pending", "processing", "shipped", "delivered", "canceled"]] = "pending"
     payment_status: Optional[str] = "unpaid" 
     payment_method: Optional[str] = None
+    delivery_method: str
+
 
 
 class OrderCreate(OrderBase):
