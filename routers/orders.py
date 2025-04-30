@@ -82,19 +82,21 @@ async def delete_order(order_id: int, db: db_dependency):
 
 @router.patch("/{order_id}/status", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 async def update_order_status(order_id: int, update_data: OrderStatusUpdate, db: db_dependency):
-
+    """
+    Update the status of an existing order.
+    Expects a JSON payload with 'status' field, e.g., {"status": "shipped"}
+    """
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
     # Validate status
-    valid_statuses = ["pending", "processing", "shipped", "delivered", "canceled", "paid"]
+    valid_statuses = ["pending", "processing", "shipped", "delivered", "canceled"]
     if update_data.status not in valid_statuses:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid status. Must be one of {valid_statuses}"
         )
-
     # Update the order's status
     order.status = update_data.status
     order.updated_at = datetime.now(TIMEZONE)  # Update timestamp
