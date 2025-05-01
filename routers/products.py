@@ -48,15 +48,15 @@ async def get_num_products(db: db_dependency):
 
 @router.get("", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
 async def get_all_products(
-    db: db_dependency, 
+    db: db_dependency,
     redis: redis_dependency,
-    category_id: Optional[int] = Query(None), 
+    category_id: Optional[int] = Query(None),
     brand_id: Optional[int] = Query(None),
     available: Optional[bool] = Query(None),
     discount: Optional[bool] = Query(None),
     max_price: Optional[float] = Query(None),
     search_query: Optional[str] = Query(None),
-    page: Optional[int] = Query(None, ge=1), 
+    page: Optional[int] = Query(None, ge=1),
     page_size: Optional[int] = Query(None, ge=1, le=100)
 ):
     logger.info(f"Request: page={page}, page_size={page_size}")
@@ -64,82 +64,64 @@ async def get_all_products(
         redis.flushall()
         logger.info("Redis cache cleared")
 
-        if page and page_size:
-            offset = (page - 1) * page_size
-        else:
-            offset = 0
-        
+        offset = (page - 1) * page_size if page and page_size else 0
+        query = db.query(Product)
+
+        # Search logic
         if search_query:
-            # Check if search_query is a valid integer
             try:
                 product_id = int(search_query)
-                # Search by product ID
-                query = db.query(Product).filter(Product.id == product_id)
-                product = query.first()
-                if product:
-                    logger.info(f"Found product with ID {product_id}")
-                    products = [product]
-                else:
-                    logger.info(f"No product found with ID {product_id}")
-                    products = []
-                fill_cache_products(products, redis)
-                return products
+                query = query.filter(Product.id == product_id)
+                logger.info(f"Searching by product ID: {product_id}")
             except ValueError:
-                # If search_query is not an integer, perform the original search
-                query = db.query(Product).filter(Product.search_string.ilike(f"%{search_query}%"))\
-                    .order_by(text("date_created DESC"))\
-                    .offset(offset)
-                products = query.limit(page_size).all() if page_size else query.all()
-                logger.info(f"Search query, fetched {len(products)} products")
-                fill_cache_products(products, redis)
-                return products
+                query = query.filter(Product.search_string.ilike(f"%{search_query}%"))
+                logger.info(f"Searching by text: {search_query}")
 
-        else:
-            if category_id:
-                categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
-                category_ids = [category.id for category in categories]
-                category_ids.append(category_id)
-                logger.info(f"Category IDs: {category_ids}")
-            filters = check_filters_products(brand_id, available, discount, max_price)
-            logger.info(f"Filters applied: {filters}")
-            
-            if category_id:
-                query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters)\
-                    .order_by(text("date_created DESC"))\
-                    .offset(offset)
-            else:
-                query = db.query(Product).filter(and_(*filters))\
-                    .order_by(text("date_created DESC"))\
-                    .offset(offset)
-            
-            logger.info(f"Query: {str(query)}")
-            products = query.limit(page_size).all() if page_size else query.all()
-            logger.info(f"Fetched {len(products)} products")
-            fill_cache_products(products, redis)
-            return products
-    
-    except Exception as e:
-        logger.error(f"Exception: {str(e)}")
-        redis.flushall()
-        logger.info("Redis cache cleared in exception block")
+        # Category filter
         if category_id:
             categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
             category_ids = [category.id for category in categories]
             category_ids.append(category_id)
+            query = query.filter(Product.category_id.in_(category_ids))
+            logger.info(f"Category IDs: {category_ids}")
+
+        # Other filters
         filters = check_filters_products(brand_id, available, discount, max_price)
-        if category_id:
-            query = db.query(Product).filter(Product.category_id.in_(category_ids), *filters)\
-                .order_by(text("date_created DESC"))\
-                .offset(offset)
-        else:
-            query = db.query(Product).filter(and_(*filters))\
-                .order_by(text("date_created DESC"))\
-                .offset(offset)
+        query = query.filter(*filters)
+        logger.info(f"Filters applied: {filters}")
+
+        # Final query execution
+        query = query.order_by(text("date_created DESC")).offset(offset)
         products = query.limit(page_size).all() if page_size else query.all()
-        logger.info(f"Exception block fetched {len(products)} products")
+
+        logger.info(f"Fetched {len(products)} products")
         fill_cache_products(products, redis)
         return products
 
+    except Exception as e:
+        logger.error(f"Exception: {str(e)}")
+        redis.flushall()
+        logger.info("Redis cache cleared in exception block")
+
+        # Fallback behavior (same as main logic without search_query)
+        offset = (page - 1) * page_size if page and page_size else 0
+        query = db.query(Product)
+
+        if category_id:
+            categories = db.query(Category).filter(Category.parent_category_id == category_id).all()
+            category_ids = [category.id for category in categories]
+            category_ids.append(category_id)
+            query = query.filter(Product.category_id.in_(category_ids))
+
+        filters = check_filters_products(brand_id, available, discount, max_price)
+        query = query.filter(*filters)
+
+        query = query.order_by(text("date_created DESC")).offset(offset)
+        products = query.limit(page_size).all() if page_size else query.all()
+
+        logger.info(f"Exception block fetched {len(products)} products")
+        fill_cache_products(products, redis)
+        return products
 
 @router.get("/new-arrivals", response_model=List[ProductResponse], status_code=status.HTTP_200_OK)
 async def get_new_products(
