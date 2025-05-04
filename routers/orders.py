@@ -29,7 +29,20 @@ logger = logging.getLogger("uvicorn.error")
 
 
 
-
+@router.get("/success", status_code=status.HTTP_200_OK)
+async def success(db: Session = Depends(get_db)):
+    try:
+        logger.debug("Fetching count of successful orders")
+        order_count = db.query(Order).filter(Order.status == "delivered").filter(Order.payment_status == "paid").count()
+        logger.debug(f"Successful orders: {order_count}")
+        if not order_count:
+            logger.warning("No successful orders found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No successful orders found")
+        return {"count": order_count}
+    except Exception as e:
+        logger.error(f"Database error: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error: {str(e)}")
+        
 @router.get("", response_model=List[OrderWithItems])
 def get_orders(db: Session = Depends(get_db)):
     db_orders = db.query(Order).all()
@@ -122,3 +135,4 @@ async def update_order_payment(order_id: int, update_data: OrderPaymentUpdate, d
     db.commit()
     db.refresh(order)
     return order
+

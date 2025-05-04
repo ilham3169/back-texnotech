@@ -84,3 +84,4 @@ yarl==1.18.3
 google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
+google-analytics-data
