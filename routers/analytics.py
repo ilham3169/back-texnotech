@@ -12,7 +12,10 @@ router = APIRouter(
 logger = logging.getLogger("uvicorn.error")
 
 # Set the path to the service account JSON key
-credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+credentials_path = os.path.join(os.getcwd(), "cool-arch.json")
+logger.info(f"Credentials path: {credentials_path}")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+
 GA_PROPERTY_ID = os.getenv("GA_PROPERTY_ID")
 
 @router.get("/users-last-24h", status_code=status.HTTP_200_OK)
