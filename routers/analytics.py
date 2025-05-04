@@ -12,11 +12,9 @@ router = APIRouter(
 logger = logging.getLogger("uvicorn.error")
 
 # Set the path to the service account JSON key
-credentials_path = os.path.join(os.getcwd(), "cool-arch.json")
-logger.info(f"Credentials path: {credentials_path}")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+ga_property_id = os.getenv("GA_PROPERTY_ID")
 
-GA_PROPERTY_ID = "487613548"  
 
 @router.get("/users-last-24h", status_code=status.HTTP_200_OK)
 async def get_users_last_24h():
