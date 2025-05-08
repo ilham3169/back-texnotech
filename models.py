@@ -134,6 +134,7 @@ class Order(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     delivery_method = Column(String(63), nullable=False)
+    month = Column(Integer, nullable=False)
 
 
     # Relationship with OrderItems

@@ -211,6 +211,7 @@ class OrderBase(BaseModel):
     payment_status: Optional[str] = "unpaid" 
     payment_method: Optional[str] = None
     delivery_method: str
+    month: Optional[int] = 0
 
 
 
