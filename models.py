@@ -4,6 +4,8 @@ from sqlalchemy import ( # type: ignore
 from sqlalchemy.orm import relationship # type: ignore
 from database import Base
 from datetime import datetime
+from sqlalchemy.sql import func
+
 
 
 class User(Base):
@@ -151,3 +153,14 @@ class OrderItem(Base):
 
     # Relationship with Orders
     order = relationship("Order", back_populates="order_items")
+
+class Banner(Base):
+    __tablename__ = "banners"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    desc = Column(String(255), nullable=False)
+    cover = Column(String(500), nullable=False)  # URL to the image
+    active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

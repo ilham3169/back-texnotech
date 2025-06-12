@@ -290,3 +290,31 @@ class OrderPaymentUpdate(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
+
+
+class BannerBase(BaseModel):
+    title: str
+    desc: str
+    cover: str
+    active: Optional[bool] = True
+
+class BannerCreate(BannerBase):
+    pass
+
+class BannerUpdate(BaseModel):
+    title: Optional[str] = None
+    desc: Optional[str] = None
+    cover: Optional[str] = None
+    active: Optional[bool] = None
+
+class BannerResponse(BannerBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class BannerStatusUpdate(BaseModel):
+    active: bool
+    
