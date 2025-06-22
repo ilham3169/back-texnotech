@@ -318,3 +318,15 @@ class BannerResponse(BannerBase):
 class BannerStatusUpdate(BaseModel):
     active: bool
     
+class TelegramMessage(BaseModel):
+    order_id: int
+    name: str
+    surname: str
+    phone_number: str
+    total_price: float
+    payment_method: str
+    delivery_method: str
+    month: Optional[int] = None
+
+    class Config:
+        from_attributes = True
